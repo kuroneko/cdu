@@ -1,0 +1,11 @@
+MCDU: The SimStack MCDU Application
+
+MCDU is loosly adapted from Hoppie's MCDU application and genericised 
+  for alternate CDU models
+
+By default, a CDU contains a 24column x 14 row interface with 12 LSKs,
+6 per side of the display.
+
+It may also contain a number of special function keys.
+
+
