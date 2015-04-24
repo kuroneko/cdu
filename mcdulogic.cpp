@@ -108,7 +108,7 @@ MCDULogic::do_exec()
 void
 MCDULogic::do_delete()
 {
-  if (scratchpad.length() == 0) {
+  if (messages.empty() && scratchpad.length() == 0) {
     scratchpad = "DELETE";
     delete_selected = true;
   }
@@ -204,7 +204,7 @@ MCDULogic::do_keyboard(const SDL_Event &eventInfo)
   if (eventInfo.type == SDL_KEYUP) {
     return;
   }
-  if (!messages.empty()) {
+  if (!messages.empty() || delete_selected) {
     return;
   }
   int glyph = eventInfo.key.keysym.sym;
