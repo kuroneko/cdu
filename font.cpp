@@ -8,25 +8,56 @@
 using namespace std;
 using namespace mcdu;
 
-MCDUFont::MCDUFont(const std::string &fontname, int basesize)
+MCDUFont::MCDUFont(SDL_Renderer *newRenderer)
 {
-  TTF_Font *theFont = TTF_OpenFont(fontname.c_str(), basesize);
-  if (NULL == theFont) {
-    //FIXME: throw exception to indicate failure
-    return;
+  renderer = newRenderer;
+  font = NULL;
+  max_width = 0;
+  max_height = 0;
+  // empty the glyph table
+  for (int i = 0; i < 256; i++) {
+    glyphs[i] = NULL;
+  }
+}
+
+MCDUFont::MCDUFont(SDL_Renderer *newRenderer, const std::string &fontname, int basesize) : MCDUFont(newRenderer)
+{
+  loadAerowinxTTF(fontname, basesize);
+}
+
+MCDUFont::~MCDUFont()
+{
+  // release any loaded glyphs
+  for (int i = 0; i < 256; i++) {
+    if (glyphs[i] != NULL) {
+      SDL_DestroyTexture(glyphs[i]);
+      glyphs[i] = NULL;
+    }
+  }
+  close_font();
+}
+
+bool
+MCDUFont::loadAerowinxTTF(const std::string &fontname, int size)
+{
+  if (!open_font(fontname, size)) {
+    return false;
   }
   // now, build the glyph table
   for (int i = 0; i < 256; i++) {
     glyphs[i] = NULL;
   }
 
-#define PREP_GLYPH(x) glyphs[x] = prerender_glyph(theFont, x)
-  for (int i = 'A'; i < 'Z'; i++) {
+#define PREP_GLYPH(x) prerender_glyph(x, x)
+  for (int i = 'A'; i <= 'Z'; i++) {
     PREP_GLYPH(i);
   }
-  for (int i = '0'; i < '9'; i++) {
+  for (int i = '0'; i <= '9'; i++) {
     PREP_GLYPH(i);
   }
+  PREP_GLYPH('.');
+  PREP_GLYPH('(');
+  PREP_GLYPH(')');
   PREP_GLYPH(G_DEGREE);
   PREP_GLYPH(G_BOX);
   PREP_GLYPH(G_ARROW_UP);
@@ -35,34 +66,47 @@ MCDUFont::MCDUFont(const std::string &fontname, int basesize)
   PREP_GLYPH(G_ARROW_RIGHT);
   PREP_GLYPH(G_TRIANGLE);
 
-  TTF_CloseFont(theFont);
+  return true;
 }
 
-MCDUFont::~MCDUFont()
+bool 
+MCDUFont::open_font(const std::string &fontname, int size)
 {
-  // release any loaded glyphs
-  for (int i = 0; i < 256; i++) {
-    if (glyphs[i] != NULL) {
-      GPU_FreeImage(glyphs[i]);
-      glyphs[i] = NULL;
-    }
+  close_font();
+  font = TTF_OpenFont(fontname.c_str(), size);
+  if (NULL == font) {
+    return false;
+  }
+  return true; 
+}
+
+void
+MCDUFont::close_font()
+{
+  if (NULL != font) {
+    TTF_CloseFont(font);
+    font = NULL;
   }
 }
 
-GPU_Image *
-MCDUFont::prerender_glyph(TTF_Font *font, char point)
+void
+MCDUFont::prerender_glyph(char point, char glyph)
 {
-  GPU_Image *rv = NULL;
+  SDL_Texture *rv = NULL;
   char    sbuf[2] = {point, '\0'};
 
   SDL_Surface *cleanGlyph = TTF_RenderText_Blended(font, sbuf, SDL_Color{255,255,255,255});
-  rv = GPU_CopyImageFromSurface(cleanGlyph);
+  if (cleanGlyph->w > max_width) {
+    max_width = cleanGlyph->w;
+  }
+  if (cleanGlyph->h > max_height) {
+    max_height = cleanGlyph->h;
+  }
+  glyphs[glyph] = SDL_CreateTextureFromSurface(renderer, cleanGlyph);
   SDL_FreeSurface(cleanGlyph);
-
-  return rv;
 }
 
-const GPU_Image *
+SDL_Texture *
 MCDUFont::glyphFor(int point)
 {
   return glyphs[point];
