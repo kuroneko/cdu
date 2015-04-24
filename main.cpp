@@ -26,9 +26,9 @@ main(int argc, char **argv)
     exit(1);
   }
 
-  MCDU *cdu = new MCDU(win, rend);
+  MCDUDisplay *cdu = new MCDUDisplay(win, rend);
 
-  cdu->write_at(0,0, Font_Large, CDU_Green, "SIMSTACK MCDU");
+  cdu->write_at(0,0, Font_Large, CDU_White, "SIMSTACK MCDU");
   cdu->write_at(13,0, Font_Large, CDU_Red, "PLEASE WAIT");
 
   cdu->render(0,0);

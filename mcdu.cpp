@@ -5,7 +5,7 @@
 using namespace std;
 using namespace mcdu;
 
-MCDU::MCDU(SDL_Window *window, SDL_Renderer *renderer, int newRows, int newCols) 
+MCDUDisplay::MCDUDisplay(SDL_Window *window, SDL_Renderer *renderer, int newRows, int newCols) 
 {
   cduWindow = window;
   cduRenderer = renderer;
@@ -22,7 +22,7 @@ MCDU::MCDU(SDL_Window *window, SDL_Renderer *renderer, int newRows, int newCols)
   clear();
 }
 
-MCDU::~MCDU() 
+MCDUDisplay::~MCDUDisplay() 
 {
   if (NULL != largeFont) {
     delete largeFont;
@@ -39,7 +39,7 @@ MCDU::~MCDU()
 }
 
 void
-MCDU::render(int xoffs, int yoffs) 
+MCDUDisplay::render(int xoffs, int yoffs) 
 {
   SDL_SetRenderDrawColor(cduRenderer, 0, 0, 0, 255);
   SDL_SetRenderDrawBlendMode(cduRenderer, SDL_BLENDMODE_NONE);
@@ -60,7 +60,7 @@ MCDU::render(int xoffs, int yoffs)
 }
 
 SDL_Color
-MCDU::color_for_ARINCColor(enum ARINC_Color color)
+MCDUDisplay::color_for_ARINCColor(enum ARINC_Color color)
 {
   switch (color) {
   case CDU_Black:
@@ -83,7 +83,7 @@ MCDU::color_for_ARINCColor(enum ARINC_Color color)
 }
 
 void
-MCDU::render_cell(int xoffs, int yoffs, int row, int column)
+MCDUDisplay::render_cell(int xoffs, int yoffs, int row, int column)
 {
   int   dataOffs = (row*columns)+column;
 
@@ -122,13 +122,13 @@ MCDU::render_cell(int xoffs, int yoffs, int row, int column)
 }
 
 CDU_Cell *  
-MCDU::cell_for(int row, int column)
+MCDUDisplay::cell_for(int row, int column)
 {
   return &(data[(row*columns) + column]);
 }
 
 void
-MCDU::clear()
+MCDUDisplay::clear()
 {
   for (int i; i < rows*columns; i++) {
     data[i].glyph = 0;
@@ -137,7 +137,7 @@ MCDU::clear()
 }
 
 void
-MCDU::write_at(int row, int col, enum CDU_Font font, enum ARINC_Color color, const std::string &message)
+MCDUDisplay::write_at(int row, int col, enum CDU_Font font, enum ARINC_Color color, const std::string &message)
 {
   if (row >= rows) {
     return;

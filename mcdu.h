@@ -77,10 +77,10 @@ namespace mcdu {
     enum CDU_Font    font;
   };
 
-  class MCDU {
+  class MCDUDisplay {
   public:
-    MCDU(SDL_Window *window, SDL_Renderer *renderer, int rows=14, int cols=24);
-    ~MCDU();
+    MCDUDisplay(SDL_Window *window, SDL_Renderer *renderer, int rows=14, int cols=24);
+    ~MCDUDisplay();
 
     void render(int xoffs, int yoffs);
     void clear();
