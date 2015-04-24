@@ -55,17 +55,45 @@ namespace mcdu {
     bool open_font(const std::string &fontname, int size);
   };
 
+  enum ARINC_Color {
+    CDU_Black = 0,
+    CDU_Magenta,
+    CDU_Cyan,
+    CDU_Amber,
+    CDU_Red,
+    CDU_White,
+    CDU_Yellow,
+    CDU_Green
+  };
+
+  enum CDU_Font {
+    Font_Large = 0,
+    Font_Small
+  };
+
+  struct CDU_Cell {
+    char            glyph;
+    enum ARINC_Color color;
+    enum CDU_Font    font;
+  };
+
   class MCDU {
   public:
-    MCDU(SDL_Window *window, SDL_Renderer *renderer);
+    MCDU(SDL_Window *window, SDL_Renderer *renderer, int rows=14, int cols=24);
     ~MCDU();
 
-    void render();
+    void render(int xoffs, int yoffs);
+    void clear();
+
+    void write_at(int row, int col, enum CDU_Font font, enum ARINC_Color color, const std::string &Message);
+
 
   private:
     int largeFontHeight;
 
-    void render_line(const std::string &text, int row, bool large=true);
+    void render_cell(int xoffs, int yoffs, int row, int column);
+
+    CDU_Cell *  cell_for(int row, int column);
 
     SDL_Window *cduWindow;
     SDL_Renderer *cduRenderer;
@@ -74,6 +102,10 @@ namespace mcdu {
     // dimensions (in text terms)
     int         columns;
     int         rows;
+    struct CDU_Cell *data;
+
+    // some helpers
+    SDL_Color color_for_ARINCColor(enum ARINC_Color color);
   };
 };
 
