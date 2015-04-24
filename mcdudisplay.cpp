@@ -43,15 +43,17 @@ MCDUDisplay::~MCDUDisplay()
 void
 MCDUDisplay::render(int xoffs, int yoffs) 
 {
-  SDL_SetRenderDrawColor(cduRenderer, 0, 0, 0, 255);
-  SDL_SetRenderDrawBlendMode(cduRenderer, SDL_BLENDMODE_NONE);
+  if (render_background) {
+    SDL_SetRenderDrawColor(cduRenderer, 0, 0, 0, 255);
+    SDL_SetRenderDrawBlendMode(cduRenderer, SDL_BLENDMODE_NONE);
 
-  SDL_Rect  bgRect = {
-    xoffs, yoffs,
-    charcell_width * columns,
-    charcell_height * rows
-  };
-  SDL_RenderFillRect(cduRenderer, &bgRect);
+    SDL_Rect  bgRect = {
+      xoffs, yoffs,
+      charcell_width * columns,
+      charcell_height * rows
+    };
+    SDL_RenderFillRect(cduRenderer, &bgRect);
+  }
 
   for (int i = 0; i < rows; i++) {
     for (int j = 0; j < columns; j++) {
@@ -155,24 +157,27 @@ MCDUDisplay::write_at(int row, int col, enum CDU_Font font, enum ARINC_Color col
   }
 }
 
-void
-MCDUDisplay::self_test() {
-  string  testLine = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-+/%()!\'#*^?:;~ ";
+int
+MCDUDisplay::getRows()
+{
+  return rows;
+}
 
-  enum ARINC_Color color[] = {
-    CDU_White, CDU_Red, CDU_Green, CDU_Cyan, CDU_Magenta, CDU_Amber, CDU_Yellow
-  };
+int
+MCDUDisplay::getColumns()
+{
+  return columns;
+}
 
-  int colOffs = 0;
-  for (int i = 0; i < rows; i++) {
-    for (int j = 0; j < columns; ) {
-      int subLength = testLine.length() - colOffs;
-      if (subLength > (columns-j)) {
-        subLength = (columns-j);
-      }
-      write_at(i, j, (i%2)?Font_Small:Font_Large, color[i%7], testLine.substr(colOffs, subLength));
-      j += subLength;
-      colOffs = (colOffs + subLength) % testLine.length();
-    }
+void 
+MCDUDisplay::clear_line(int row, int startCol, int endCol)
+{
+  if (endCol < 0) {
+    endCol = columns + endCol;
+  }
+  for (int i = startCol; i <= endCol; i++) {
+    CDU_Cell *thisCell = cell_for(row, i);
+    thisCell->glyph = 0;
+    thisCell->color = CDU_Black;
   }
 }

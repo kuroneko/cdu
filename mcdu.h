@@ -5,9 +5,11 @@
 #define _MCDU_H
 
 #include <string>
+#include <list>
 #include <cstdio>
 #include <SDL.h>
 #include <SDL_ttf.h>
+#include <SDL_image.h>
 
 #include "ss.h"
 
@@ -85,44 +87,78 @@ namespace mcdu {
     void render(int xoffs, int yoffs);
     void clear();
 
-    void write_at(int row, int col, enum CDU_Font font, enum ARINC_Color color, const std::string &Message);
-
-    void self_test();
+    void write_at(int row, int col, enum CDU_Font font, 
+      enum ARINC_Color color, const std::string &Message);
 
     // these two variables control the output size of the CDU panel.
     // note that the CDU panel is not clipped to this region!
     int   charcell_width;
     int   charcell_height;
 
-  private:
-    void render_cell(int xoffs, int yoffs, int row, int column);
+    // render background enabled/disables the black background.
+    bool  render_background = true;
 
+    int getRows();
+    int getColumns();
+    void clear_line(int row, int startCol=0, int endCol=-1);
+
+  protected:
+    // some helpers
+    SDL_Color color_for_ARINCColor(enum ARINC_Color color);
+    void render_cell(int xoffs, int yoffs, int row, int column);
     CDU_Cell *  cell_for(int row, int column);
+
+    // dimensions (in text terms)
+    int         columns;
+    int         rows;
 
     SDL_Window *cduWindow;
     SDL_Renderer *cduRenderer;
     MCDUFont   *largeFont;
     MCDUFont   *smallFont;
-    // dimensions (in text terms)
-    int         columns;
-    int         rows;
     struct CDU_Cell *data;
 
-    // some helpers
-    SDL_Color color_for_ARINCColor(enum ARINC_Color color);
   };
 
   class MCDULogic {
   public:
     int   display_offset_x = 0;
     int   display_offset_y = 0;
-    
+    SDL_Texture *background = NULL;
+    int   bg_offset_x = 0;
+    int   bg_offset_y = 0;
+    int   bg_size_w = 0;
+    int   bg_size_h = 0;
+
+    std::string scratchpad;
+
     MCDULogic(SDL_Window *win, SDL_Renderer *rend, int fontsize=24);
     //~MCDULogic();
 
-    void loop();
+    virtual void loop();
+
+    virtual void self_test();
+
+    virtual void msg_remove(const std::string &msg);
+    virtual void msg_show(const std::string &msg);
 
     MCDUDisplay   display;
+  protected:
+    std::list<std::string>  messages;
+    bool        annun_msg;
+    bool        under_test;
+    bool        delete_selected;
+
+    void update_scratchpad();
+    virtual void render();
+    virtual void handle_keypress(SDL_Event &eventInfo);
+    virtual void do_delete();
+    virtual void do_exec();
+    virtual void do_clear(const SDL_Event &eventInfo);
+    virtual void do_keyboard(const SDL_Event &eventInfo);
+
+    SDL_Window *cduWindow;
+    SDL_Renderer *cduRenderer;
   };
 
 
