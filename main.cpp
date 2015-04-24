@@ -26,13 +26,8 @@ main(int argc, char **argv)
     exit(1);
   }
 
-  MCDUDisplay *cdu = new MCDUDisplay(win, rend);
-
-  cdu->write_at(0,0, Font_Large, CDU_White, "SIMSTACK MCDU");
-  cdu->write_at(13,0, Font_Large, CDU_Red, "PLEASE WAIT");
-
-  cdu->render(0,0);
-  SDL_Delay(5000);
+  MCDULogic mcdu(win, rend, 24);
+  mcdu.loop();
   SDL_Quit();
 
   return 0;

@@ -55,7 +55,7 @@ namespace mcdu {
     bool open_font(const std::string &fontname, int size);
   };
 
-  enum ARINC_Color {
+  enum ARINC_Color : int {
     CDU_Black = 0,
     CDU_Magenta,
     CDU_Cyan,
@@ -79,7 +79,7 @@ namespace mcdu {
 
   class MCDUDisplay {
   public:
-    MCDUDisplay(SDL_Window *window, SDL_Renderer *renderer, int rows=14, int cols=24);
+    MCDUDisplay(SDL_Window *window, SDL_Renderer *renderer, int fontSize=24, int rows=14, int cols=24);
     ~MCDUDisplay();
 
     void render(int xoffs, int yoffs);
@@ -87,10 +87,14 @@ namespace mcdu {
 
     void write_at(int row, int col, enum CDU_Font font, enum ARINC_Color color, const std::string &Message);
 
+    void self_test();
+
+    // these two variables control the output size of the CDU panel.
+    // note that the CDU panel is not clipped to this region!
+    int   charcell_width;
+    int   charcell_height;
 
   private:
-    int largeFontHeight;
-
     void render_cell(int xoffs, int yoffs, int row, int column);
 
     CDU_Cell *  cell_for(int row, int column);
@@ -107,6 +111,21 @@ namespace mcdu {
     // some helpers
     SDL_Color color_for_ARINCColor(enum ARINC_Color color);
   };
+
+  class MCDULogic {
+  public:
+    int   display_offset_x = 0;
+    int   display_offset_y = 0;
+    
+    MCDULogic(SDL_Window *win, SDL_Renderer *rend, int fontsize=24);
+    //~MCDULogic();
+
+    void loop();
+
+    MCDUDisplay   display;
+  };
+
+
 };
 
 #endif /* _MCDU_H */
