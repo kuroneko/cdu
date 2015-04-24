@@ -9,10 +9,12 @@ MCDU::MCDU(SDL_Window *window, SDL_Renderer *renderer)
 {
   cduWindow = window;
   cduRenderer = renderer;
-  largeFontHeight = 32;
+  largeFontHeight = 24;
 
-  largeFont = new MCDUFont(cduRenderer, "resources/awnxfmcl_fans05.TTF", largeFontHeight);
-  smallFont = new MCDUFont(cduRenderer, "resources/awnxfmcs_fans05.TTF", largeFontHeight);
+  largeFont = new MCDUFont(cduRenderer);
+  largeFont->loadAerowinxTTF("resources/awnxfmcl_fans05.TTF", largeFontHeight);
+  smallFont = new MCDUFont(cduRenderer);
+  smallFont->loadUnicodeTTF("resources/awnxfmcs_fans05.TTF", largeFontHeight);  
 }
 
 MCDU::~MCDU() 
@@ -37,7 +39,7 @@ MCDU::render()
   render_line("123456789012345678901234", 1, false);
   render_line("123456789012345678901234", 2, true);
   render_line("ABCDEFGHIJKLMNOPQRSTUVWX", 3, false);
-  render_line("YZ1234567890!@#$%^&*()[]", 4, true);
+  render_line("YZ1234567890-+/*%#^?:;!~", 4, true);
 
   SDL_RenderPresent(cduRenderer);
 }

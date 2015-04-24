@@ -35,6 +35,7 @@ namespace mcdu {
     virtual ~MCDUFont();
 
     bool  loadAerowinxTTF(const std::string &fontname, int size);
+    bool  loadUnicodeTTF(const std::string &fontname, int size);
 
     // returns a GPU_Image for the requested codepoint
     SDL_Texture * glyphFor(int point);
@@ -49,6 +50,7 @@ namespace mcdu {
     TTF_Font *font;
 
     void prerender_glyph(char point, char glyph);
+    void prerender_glyph_utf8(const std::string &point, char glyph);
     void close_font();
     bool open_font(const std::string &fontname, int size);
   };
