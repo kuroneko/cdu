@@ -35,10 +35,12 @@ main(int argc, char **argv)
     SDL_Texture *bgtexture = SDL_CreateTextureFromSurface(rend, background);
     SDL_QueryTexture(bgtexture, NULL, NULL, &mcdu.bg_size_w, &mcdu.bg_size_h);
     mcdu.background = bgtexture;
-    mcdu.display_offset_x = 89;
-    mcdu.display_offset_y = 62;
+    mcdu.display.offset_x = 89;
+    mcdu.display.offset_y = 62;
     mcdu.display.charcell_height = 24;
     SDL_FreeSurface(background);
+
+    mcdu.msg_show("HELLO WORLD");
     
     mcdu.loop();
   } while (0);

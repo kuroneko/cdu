@@ -58,14 +58,15 @@ namespace mcdu {
   };
 
   enum ARINC_Color : int {
-    CDU_Black = 0,
-    CDU_Magenta,
-    CDU_Cyan,
-    CDU_Amber,
-    CDU_Red,
-    CDU_White,
-    CDU_Yellow,
-    CDU_Green
+    C_Black = 0,
+    C_Magenta,
+    C_Cyan,
+    C_Amber,
+    C_Red,
+    C_White,
+    C_Yellow,
+    C_Green,
+    C_Default  // render using the fg using the default color, and don't render any background.
   };
 
   enum CDU_Font {
@@ -75,55 +76,77 @@ namespace mcdu {
 
   struct CDU_Cell {
     char            glyph;
-    enum ARINC_Color color;
+    enum ARINC_Color fgcolor;
+    enum ARINC_Color bgcolor;
     enum CDU_Font    font;
   };
 
+  class MCDUDisplay;
+  class MCDUPage {
+  public:
+    MCDUPage(int rows, int columns);
+    MCDUPage(const MCDUPage &original);
+    ~MCDUPage();
+
+    // dimensions (in text terms)
+    const int         columns;
+    const int         rows;
+
+    void clear();
+    void clear_line(int row, int startCol=0, int endCol=-1);
+    void write_at(int row, int col,
+      const std::string &Message,
+      enum ARINC_Color fgcolor = C_Default,
+      enum CDU_Font font = Font_Large,
+      enum ARINC_Color bgcolor = C_Default);
+    void write_at(int row, int col, const MCDUPage &page);
+    void render(MCDUDisplay &display) const;
+  protected:
+    struct CDU_Cell *data;
+    CDU_Cell * cell_for(int row, int column) const;
+  };
+
   class MCDUDisplay {
+    friend class MCDUPage;
   public:
     MCDUDisplay(SDL_Window *window, SDL_Renderer *renderer, int fontSize=24, int rows=14, int cols=24);
     ~MCDUDisplay();
 
-    void render(int xoffs, int yoffs);
-    void clear();
+    // dimensions (in text terms)
+    const int         columns;
+    const int         rows;
+    // the current visible page (static)
+    MCDUPage          visiblePage;
 
-    void write_at(int row, int col, enum CDU_Font font, 
-      enum ARINC_Color color, const std::string &Message);
+    // render the page using the paramters below.
+    void render();
 
     // these two variables control the output size of the CDU panel.
     // note that the CDU panel is not clipped to this region!
     int   charcell_width;
     int   charcell_height;
 
+    int   offset_x;
+    int   offset_y;
+
     // render background enabled/disables the black background.
     bool  render_background = true;
 
-    int getRows();
-    int getColumns();
-    void clear_line(int row, int startCol=0, int endCol=-1);
-
+    enum ARINC_Color  default_fg = C_Green;
   protected:
     // some helpers
     SDL_Color color_for_ARINCColor(enum ARINC_Color color);
-    void render_cell(int xoffs, int yoffs, int row, int column);
-    CDU_Cell *  cell_for(int row, int column);
+    void render_cell(int row, int column, struct CDU_Cell *cell_data);
 
-    // dimensions (in text terms)
-    int         columns;
-    int         rows;
 
     SDL_Window *cduWindow;
     SDL_Renderer *cduRenderer;
     MCDUFont   *largeFont;
     MCDUFont   *smallFont;
-    struct CDU_Cell *data;
-
   };
 
   class MCDULogic {
   public:
-    int   display_offset_x = 0;
-    int   display_offset_y = 0;
     SDL_Texture *background = NULL;
     int   bg_offset_x = 0;
     int   bg_offset_y = 0;

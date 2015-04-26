@@ -35,7 +35,7 @@ MCDULogic::render()
 
     SDL_RenderCopy(cduRenderer, background, NULL, &dest);
   }
-  display.render(display_offset_x, display_offset_y);
+  display.render();
 }
 
 void
@@ -140,16 +140,16 @@ MCDULogic::do_clear(const SDL_Event &eventInfo)
 void
 MCDULogic::update_scratchpad()
 {
-  int scratchpadRow = display.getRows()-1; 
+  int scratchpadRow = display.rows - 1; 
   if(messages.empty()) {
     if (!under_test) {
-      display.clear_line(scratchpadRow);
-      display.write_at(scratchpadRow, 0, Font_Large, CDU_White, scratchpad);  
+      display.visiblePage.clear_line(scratchpadRow);
+      display.visiblePage.write_at(scratchpadRow, 0, scratchpad);  
     }
     annun_msg = false;
   } else {
-    display.clear_line(scratchpadRow);
-    display.write_at(scratchpadRow, 0, Font_Small, CDU_White, messages.front());
+    display.visiblePage.clear_line(scratchpadRow);
+    display.visiblePage.write_at(scratchpadRow, 0, messages.front());
     annun_msg = true;
   }
 }
@@ -173,25 +173,22 @@ MCDULogic::msg_show(const std::string &msg)
 
 void
 MCDULogic::self_test() {
-  const int rows = display.getRows();
-  const int columns = display.getColumns();
-
   under_test = true;
 
   string  testLine = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-+/%()!\'#*^?:;~ ";
 
   enum ARINC_Color color[] = {
-    CDU_White, CDU_Red, CDU_Green, CDU_Cyan, CDU_Magenta, CDU_Amber, CDU_Yellow
+    C_White, C_Red, C_Green, C_Cyan, C_Magenta, C_Amber, C_Yellow
   };
 
   int colOffs = 0;
-  for (int i = 0; i < rows; i++) {
-    for (int j = 0; j < columns; ) {
+  for (int i = 0; i < display.rows; i++) {
+    for (int j = 0; j < display.columns; ) {
       int subLength = testLine.length() - colOffs;
-      if (subLength > (columns-j)) {
-        subLength = (columns-j);
+      if (subLength > (display.columns-j)) {
+        subLength = (display.columns-j);
       }
-      display.write_at(i, j, (i%2)?Font_Small:Font_Large, color[i%7], testLine.substr(colOffs, subLength));
+      display.visiblePage.write_at(i, j, testLine.substr(colOffs, subLength), color[i%7], (i%2)?Font_Small:Font_Large);
       j += subLength;
       colOffs = (colOffs + subLength) % testLine.length();
     }
