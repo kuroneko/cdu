@@ -1,8 +1,9 @@
-#include "mcdu.h"
+#include "mcduboeing.h"
 #include <iostream>
 
 using namespace std;
 using namespace mcdu;
+using namespace mcduboeing;
 
 MCDUBoeing::MCDUBoeing(SDL_Window *win, SDL_Renderer *rend)
   : MCDULogic(win, rend, 27)

@@ -5,9 +5,10 @@
 #include <SDL_ttf.h>
 
 #include "mcdu.h"
+#include "mcduboeing.h"
 
 using namespace std;
-using namespace mcdu;
+using namespace mcduboeing;
 
 #ifdef __cplusplus
 extern "C"
