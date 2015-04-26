@@ -150,7 +150,7 @@ namespace mcdu {
     NONE = 0,  // Not a key.
     KP_0 = '0', KP_1, KP_2, KP_3, KP_4, KP_5, KP_6, KP_7, KP_8, KP_9,
     // All CDUs have these...
-    A = 'A', B, C, D, E, F, G, H, I, J, L, M,
+    A = 'A', B, C, D, E, F, G, H, I, J, K, L, M,
     N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
     PERIOD = '.',
     PLUSMINUS = '-',
@@ -204,7 +204,7 @@ namespace mcdu {
     int   bg_offset_y = 0;
     int   bg_size_w = 0;
     int   bg_size_h = 0;
-    int   long_press_threshold = 3000; // 3 seconds
+    int   long_press_threshold = 1500; // 1.5 seconds
 
 
     MCDULogic(SDL_Window *win, SDL_Renderer *rend, int fontsize=24);
@@ -238,15 +238,16 @@ namespace mcdu {
     virtual void msg_remove(const std::string &msg);
     virtual void msg_show(const std::string &msg);
   protected:
-    std::string scratchpad;
-    bool        annun_msg;
-    bool        under_test;
-    bool        delete_selected;
+    std::string scratchpad = "";
+    bool        annun_msg = false;
+    bool        under_test = false;
+    bool        delete_selected = false;
     std::list<std::string>  messages;
 
     void update_scratchpad();
     void do_clear(bool longPress);
     void do_delete();
+    void type_to_scratchpad(CDUKey key);
   };
 };
 

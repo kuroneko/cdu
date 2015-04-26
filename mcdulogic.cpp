@@ -71,15 +71,17 @@ MCDULogic::handle_keypress(SDL_Event &eventInfo)
   if (keycode == CDUKey::NONE) {
     return;
   }
+  Uint32    timestamp = SDL_GetTicks();
 
   if (eventInfo.key.type == SDL_KEYDOWN) {
-    keydowntimes.push_front(CDUKeypress{downTime: eventInfo.key.timestamp, key: keycode});
+    keydowntimes.push_front(CDUKeypress{downTime: timestamp, key: keycode});
   } else if (eventInfo.key.type == SDL_KEYUP) {
     for (list<struct CDUKeypress>::iterator item = keydowntimes.begin(); item != keydowntimes.end(); item++) {
       if (item->key == keycode) {
-        int duration = SDL_TICKS_PASSED(eventInfo.key.timestamp, item->downTime);
+        int duration = SDL_TICKS_PASSED(timestamp, item->downTime);
         keydowntimes.erase(item);
-        if (duration >= long_press_threshold) {
+        cout << "duration: " << timestamp - item->downTime << endl;
+        if (SDL_TICKS_PASSED(timestamp, item->downTime + long_press_threshold)) {
           this->long_press(keycode);
         } else {
           this->short_press(keycode);
@@ -106,6 +108,8 @@ MCDULogic::keysymToKey(const struct SDL_Keysym &sym) const
     return static_cast<CDUKey>(sym.sym);
   }
   switch (sym.sym) {
+    case SDLK_SPACE:
+      return CDUKey::SPACE;
     case SDLK_PAGEUP:
       return CDUKey::PREVPAGE;
     case SDLK_PAGEDOWN:

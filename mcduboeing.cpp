@@ -21,6 +21,68 @@ void
 MCDUBoeing::short_press(CDUKey key)
 {
   switch (key) {
+    case CDUKey::A:
+    case CDUKey::B:
+    case CDUKey::C:
+    case CDUKey::D:
+    case CDUKey::E:
+    case CDUKey::F:
+    case CDUKey::G:
+    case CDUKey::H:
+    case CDUKey::I:
+    case CDUKey::J:
+    case CDUKey::K:
+    case CDUKey::L:
+    case CDUKey::M:
+    case CDUKey::N:
+    case CDUKey::O:
+    case CDUKey::P:
+    case CDUKey::Q:
+    case CDUKey::R:
+    case CDUKey::S:
+    case CDUKey::T:
+    case CDUKey::U:
+    case CDUKey::V:
+    case CDUKey::W:
+    case CDUKey::X:
+    case CDUKey::Y:
+    case CDUKey::Z:
+    case CDUKey::KP_0:
+    case CDUKey::KP_1:
+    case CDUKey::KP_2:
+    case CDUKey::KP_3:
+    case CDUKey::KP_4:
+    case CDUKey::KP_5:
+    case CDUKey::KP_6:
+    case CDUKey::KP_7:
+    case CDUKey::KP_8:
+    case CDUKey::KP_9:
+    case CDUKey::PERIOD:
+    case CDUKey::SPACE:
+      if (delete_selected) {
+        break;
+      }
+      if (!messages.empty()) {
+        break;
+      }
+      if (scratchpad.length() >= display.columns) {
+        return;
+      }
+      scratchpad += static_cast<char>(key);
+      update_scratchpad();
+      break;
+    case CDUKey::PLUSMINUS:
+      if (scratchpad[scratchpad.length()-1] == '-') {
+        scratchpad[scratchpad.length()-1] == '+' ;
+      } else if (scratchpad[scratchpad.length()-1] == '+' ) {
+        scratchpad[scratchpad.length()-1] == '-' ;
+      } else {
+        if (scratchpad.length() < display.columns) {
+          scratchpad += '-';
+        }
+      }
+      update_scratchpad();
+      break;
     case CDUKey::CLEAR:
       do_clear(false);
       break;
@@ -79,6 +141,12 @@ MCDUBoeing::update_scratchpad()
     display.visiblePage.write_at(scratchpadRow, 0, messages.front());
     annun_msg = true;
   }
+}
+
+void
+MCDUBoeing::type_to_scratchpad(CDUKey key)
+{
+
 }
 
 void
