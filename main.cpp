@@ -29,16 +29,7 @@ main(int argc, char **argv)
   }
 
   do {
-    MCDULogic mcdu(win, rend, 27);
-
-    SDL_Surface *background = IMG_Load("resources/B744_CDU.png");
-    SDL_Texture *bgtexture = SDL_CreateTextureFromSurface(rend, background);
-    SDL_QueryTexture(bgtexture, NULL, NULL, &mcdu.bg_size_w, &mcdu.bg_size_h);
-    mcdu.background = bgtexture;
-    mcdu.display.offset_x = 89;
-    mcdu.display.offset_y = 62;
-    mcdu.display.charcell_height = 24;
-    SDL_FreeSurface(background);
+    MCDUBoeing mcdu(win, rend);
 
     mcdu.msg_show("HELLO WORLD");
     

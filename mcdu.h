@@ -6,6 +6,7 @@
 
 #include <string>
 #include <list>
+#include <unordered_map>
 #include <cstdio>
 #include <SDL.h>
 #include <SDL_ttf.h>
@@ -145,6 +146,57 @@ namespace mcdu {
     MCDUFont   *smallFont;
   };
 
+  enum class CDUKey : int {
+    NONE = 0,  // Not a key.
+    KP_0 = '0', KP_1, KP_2, KP_3, KP_4, KP_5, KP_6, KP_7, KP_8, KP_9,
+    // All CDUs have these...
+    A = 'A', B, C, D, E, F, G, H, I, J, L, M,
+    N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
+    PERIOD = '.',
+    PLUSMINUS = '-',
+    SPACE = ' ',
+    CLEAR = 256,
+    MENU,
+    // Most CDUs have there
+    LKL1, LKL2, LKL3, LKL4, LKL5, LKL6,
+    LKR1, LKR2, LKR3, LKR4, LKR5, LKR6,
+    // these are reasponably universal.
+    PREVPAGE, // Boeing + Universal (PREV)
+    NEXTPAGE, // Boeing + Universal (NEXT)
+    INIT_REF, // Boeing + Airbus (INIT)
+    PROG,   // Boeing + Airbus
+    NAVRAD, // Boeing + Airbus (RAD/NAV) + Universal (TUNE)
+    DELETE, // Boeing
+    EXEC,   // Boeing
+    RTE,    // Boeing + Airbus (F-PLN) + Universal (FPL)
+    DEPARR, // Boeing
+    ATC,    // Boeing + Airbus (ATC COMM)
+    VNAV,   // Boeing + Universal
+    FIX,    // Boeing
+    LEGS,   // Boeing
+    HOLD,   // Boeing
+    FMCCOMM, // Boeing
+    OVFY,   // Airbus
+    DIR,    // Airbus + Universal (DTO)
+    PERF,   // Airbus + Universal (PERF)
+    DATA,   // Airbus + Universal
+    FUELPRED, // Airbus + Universal (FUEL)
+    SECFPLN, // Airbus
+    AIRPORT, // Airbus
+    UP,     // Airbus
+    DOWN,   // Airbus
+    LEFT,   // Airbus
+    RIGHT,  // Airbus
+    NAV,    // Universal
+    LIST,   // Universal
+    MSG,    // Universal
+  };
+
+  struct CDUKeypress {
+    Uint32  downTime;
+    CDUKey  key;
+  };
+
   class MCDULogic {
   public:
     SDL_Texture *background = NULL;
@@ -152,39 +204,50 @@ namespace mcdu {
     int   bg_offset_y = 0;
     int   bg_size_w = 0;
     int   bg_size_h = 0;
+    int   long_press_threshold = 3000; // 3 seconds
 
-    std::string scratchpad;
 
     MCDULogic(SDL_Window *win, SDL_Renderer *rend, int fontsize=24);
     //~MCDULogic();
 
     virtual void loop();
-
     virtual void self_test();
+    virtual void short_press(CDUKey key) = 0;
+    virtual void long_press(CDUKey key) = 0;
+    virtual void msg_remove(const std::string &msg) = 0;
+    virtual void msg_show(const std::string &msg) = 0;
 
-    virtual void msg_remove(const std::string &msg);
-    virtual void msg_show(const std::string &msg);
+    virtual CDUKey keysymToKey(const struct SDL_Keysym &sym) const;
 
     MCDUDisplay   display;
   protected:
-    std::list<std::string>  messages;
-    bool        annun_msg;
-    bool        under_test;
-    bool        delete_selected;
-
-    void update_scratchpad();
+    std::list<struct CDUKeypress> keydowntimes;
     virtual void render();
     virtual void handle_keypress(SDL_Event &eventInfo);
-    virtual void do_delete();
-    virtual void do_exec();
-    virtual void do_clear(const SDL_Event &eventInfo);
-    virtual void do_keyboard(const SDL_Event &eventInfo);
 
     SDL_Window *cduWindow;
     SDL_Renderer *cduRenderer;
   };
 
+  class MCDUBoeing : public MCDULogic {
+  public:
+    MCDUBoeing(SDL_Window *win, SDL_Renderer *rend);
 
+    virtual void short_press(CDUKey key);
+    virtual void long_press(CDUKey key);
+    virtual void msg_remove(const std::string &msg);
+    virtual void msg_show(const std::string &msg);
+  protected:
+    std::string scratchpad;
+    bool        annun_msg;
+    bool        under_test;
+    bool        delete_selected;
+    std::list<std::string>  messages;
+
+    void update_scratchpad();
+    void do_clear(bool longPress);
+    void do_delete();
+  };
 };
 
 #endif /* _MCDU_H */

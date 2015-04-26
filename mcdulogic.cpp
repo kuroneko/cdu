@@ -15,11 +15,8 @@ MCDULogic::MCDULogic(SDL_Window *win, SDL_Renderer *rend, int fontsize)
 {
   cduWindow = win;
   cduRenderer = rend;
-  background = NULL;
-  under_test = 0;
   self_test();
 }
-
 
 void
 MCDULogic::render()
@@ -32,7 +29,6 @@ MCDULogic::render()
       bg_offset_x, bg_offset_y,
       bg_size_w, bg_size_h
     };
-
     SDL_RenderCopy(cduRenderer, background, NULL, &dest);
   }
   display.render();
@@ -42,7 +38,6 @@ void
 MCDULogic::loop()
 {
   while(1) {
-    update_scratchpad();
     render();
 
     SDL_Event eventInfo;
@@ -70,111 +65,76 @@ MCDULogic::handle_keypress(SDL_Event &eventInfo)
   if (eventInfo.key.repeat) {
     return;
   }
-  if ((eventInfo.key.keysym.sym >= 'A' && eventInfo.key.keysym.sym <= 'Z')
-    || (eventInfo.key.keysym.sym >= 'a' && eventInfo.key.keysym.sym <= 'z')
-    || (eventInfo.key.keysym.sym >= '0' && eventInfo.key.keysym.sym <= '9')
-    || (eventInfo.key.keysym.sym >= SDLK_KP_1 && eventInfo.key.keysym.sym <= SDLK_KP_PERIOD)
-    || eventInfo.key.keysym.sym == SDLK_SPACE || eventInfo.key.keysym.sym == SDLK_KP_SPACE) {
-    do_keyboard(eventInfo);
+  CDUKey    keycode = CDUKey::NONE;
+
+  keycode = this->keysymToKey(eventInfo.key.keysym);
+  if (keycode == CDUKey::NONE) {
+    return;
   }
-  switch (eventInfo.key.keysym.sym) {
-    case SDLK_BACKSPACE:
-      do_clear(eventInfo);
-      break;
-    case SDLK_DELETE:
-      if (eventInfo.type == SDL_KEYDOWN) {
-        do_delete();
+
+  if (eventInfo.key.type == SDL_KEYDOWN) {
+    keydowntimes.push_front(CDUKeypress{downTime: eventInfo.key.timestamp, key: keycode});
+  } else if (eventInfo.key.type == SDL_KEYUP) {
+    for (list<struct CDUKeypress>::iterator item = keydowntimes.begin(); item != keydowntimes.end(); item++) {
+      if (item->key == keycode) {
+        int duration = SDL_TICKS_PASSED(eventInfo.key.timestamp, item->downTime);
+        keydowntimes.erase(item);
+        if (duration >= long_press_threshold) {
+          this->long_press(keycode);
+        } else {
+          this->short_press(keycode);
+        }
+        return;
       }
-      break;
+    }
+    this->short_press(keycode);
+  }
+}
+
+//FIXME: this translation needs to be dynamically loadable
+CDUKey
+MCDULogic::keysymToKey(const struct SDL_Keysym &sym) const
+{
+  // first, map the SDL keysym to a CDU keysym
+  if (sym.sym >= 'A' && sym.sym <= 'Z') {
+    return static_cast<CDUKey>(sym.sym);
+  }
+  if (sym.sym >= 'a' && sym.sym <= 'z') {
+    return static_cast<CDUKey>(toupper(sym.sym));
+  }
+  if (sym.sym >= '0' && sym.sym <= '9') {
+    return static_cast<CDUKey>(sym.sym);
+  }
+  switch (sym.sym) {
+    case SDLK_PAGEUP:
+      return CDUKey::PREVPAGE;
+    case SDLK_PAGEDOWN:
+      return CDUKey::NEXTPAGE;
+    case SDLK_UP:
+      return CDUKey::UP;
+    case SDLK_DOWN:
+      return CDUKey::DOWN;
+    case SDLK_LEFT:
+      return CDUKey::LEFT;
+    case SDLK_RIGHT:
+      return CDUKey::RIGHT;
+    case SDLK_BACKSPACE:
+      return CDUKey::CLEAR;
+    //FIXME:  these belong in the Boeing logic only
+    case SDLK_DELETE:
+      return CDUKey::DELETE;
     case SDLK_KP_ENTER:
     case SDLK_RETURN:
     case SDLK_RETURN2:
-      if (eventInfo.type == SDL_KEYDOWN) {
-        do_exec();
-      }
-      break;
+      return CDUKey::EXEC;
     default:
       break;
   }
-
-}
-
-void
-MCDULogic::do_exec()
-{
-
-}
-
-void
-MCDULogic::do_delete()
-{
-  if (messages.empty() && scratchpad.length() == 0) {
-    scratchpad = "DELETE";
-    delete_selected = true;
-  }
-}
-
-void
-MCDULogic::do_clear(const SDL_Event &eventInfo)
-{
-  //FIXME:  Handle held-CLR.
-  // ignore keyups for now
-  if (eventInfo.type == SDL_KEYUP) {
-    return;
-  }
-  if (messages.empty()) {
-    // no messages?  clear delete if set, otherwise start removing character by character from the scratchpad.
-    if (delete_selected) {
-      scratchpad = "";
-      delete_selected = false;
-    } else if (scratchpad.length() > 0) {
-      scratchpad.resize(scratchpad.length()-1);
-    }
-  } else {
-    // displaying a message?  show the next one.
-    messages.pop_front();
-  }
-  update_scratchpad();
-}
-
-void
-MCDULogic::update_scratchpad()
-{
-  int scratchpadRow = display.rows - 1; 
-  if(messages.empty()) {
-    if (!under_test) {
-      display.visiblePage.clear_line(scratchpadRow);
-      display.visiblePage.write_at(scratchpadRow, 0, scratchpad);  
-    }
-    annun_msg = false;
-  } else {
-    display.visiblePage.clear_line(scratchpadRow);
-    display.visiblePage.write_at(scratchpadRow, 0, messages.front());
-    annun_msg = true;
-  }
-}
-
-void
-MCDULogic::msg_remove(const std::string &msg)
-{
-  under_test = false;
-  messages.remove(msg);
-  update_scratchpad();
-}
-
-void
-MCDULogic::msg_show(const std::string &msg)
-{
-  under_test = false;
-  messages.remove(msg);
-  messages.emplace_front(msg);
-  update_scratchpad();
+  return CDUKey::NONE;
 }
 
 void
 MCDULogic::self_test() {
-  under_test = true;
-
   string  testLine = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-+/%()!\'#*^?:;~ ";
 
   enum ARINC_Color color[] = {
@@ -194,65 +154,3 @@ MCDULogic::self_test() {
     }
   }
 }
-
-void
-MCDULogic::do_keyboard(const SDL_Event &eventInfo)
-{
-  if (eventInfo.type == SDL_KEYUP) {
-    return;
-  }
-  if (!messages.empty() || delete_selected) {
-    return;
-  }
-  int glyph = eventInfo.key.keysym.sym;
-  if (glyph >= 'a' && glyph <= 'z') {
-    toupper(glyph);
-    scratchpad += (char)toupper(glyph);
-  } else if (glyph >= 'A' && glyph <= 'Z') {
-    scratchpad += (char)glyph;
-  } else if (glyph >= '0' && glyph <= '9') {
-    scratchpad += (char)glyph;
-  } else {
-    switch(glyph) {
-    case SDLK_KP_1:
-      scratchpad += '1';
-      break;
-    case SDLK_KP_2:
-      scratchpad += '2';
-      break;
-    case SDLK_KP_3:
-      scratchpad += '3';
-      break;
-    case SDLK_KP_4:
-      scratchpad += '4';
-      break;
-    case SDLK_KP_5:
-      scratchpad += '5';
-      break;
-    case SDLK_KP_6:
-      scratchpad += '6';
-      break;
-    case SDLK_KP_7:
-      scratchpad += '7';
-      break;
-    case SDLK_KP_8:
-      scratchpad += '8';
-      break;
-    case SDLK_KP_9:
-      scratchpad += '9';
-      break;
-    case SDLK_KP_0:
-      scratchpad += '0';
-      break;
-    case SDLK_KP_PERIOD:
-      scratchpad += '.';
-      break;
-    case SDLK_SPACE:
-    case SDLK_KP_SPACE:
-      scratchpad += ' ';
-      break;
-    }
-  }
-  update_scratchpad();
-}
-
