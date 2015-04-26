@@ -247,7 +247,6 @@ namespace mcdu {
     void update_scratchpad();
     void do_clear(bool longPress);
     void do_delete();
-    void type_to_scratchpad(CDUKey key);
   };
 };
 

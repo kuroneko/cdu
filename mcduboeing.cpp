@@ -144,12 +144,6 @@ MCDUBoeing::update_scratchpad()
 }
 
 void
-MCDUBoeing::type_to_scratchpad(CDUKey key)
-{
-
-}
-
-void
 MCDUBoeing::do_delete()
 {
   // do nothing is there's a pending message
