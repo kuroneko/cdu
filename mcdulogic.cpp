@@ -15,6 +15,8 @@ MCDULogic::MCDULogic(SDL_Window *win, SDL_Renderer *rend, int fontsize)
 {
   cduWindow = win;
   cduRenderer = rend;
+  // 2 seconds is the actual long-action threshold for Boeing.
+  long_press_threshold = 2000;
   self_test();
 }
 
