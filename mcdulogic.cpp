@@ -42,8 +42,29 @@ MCDULogic::loop()
 
     SDL_Event eventInfo;
 
-    if (!SDL_WaitEvent(&eventInfo)) {
-      return;
+    if (!SDL_PollEvent(NULL) && long_press_threshold != 0 && keydowntimes.size() > 0) {
+      // the oldest key pressed will ALWAYS be at the back of the list.
+      Uint32  firstKey = keydowntimes.back().downTime;
+      Uint32  curTime = SDL_GetTicks();
+
+      if (curTime-firstKey >= long_press_threshold) {
+        // if the longpress key pressed has exceeded its timeout, invoke the longpress and
+        // remove it from the pending keys
+        this->long_press(keydowntimes.back().point);
+        keydowntimes.pop_back();
+        continue;
+      } else {
+        SDL_ClearError();
+        if (!SDL_WaitEventTimeout(&eventInfo, long_press_threshold-(curTime-firstKey))) {
+          // timeout.  Re-enter so the early attempt to catch timeouts can fire.
+          continue;
+        }
+      }
+    } else {
+      if (!SDL_WaitEvent(&eventInfo)) {
+        cout << SDL_GetError() << endl;
+        return;
+      }
     }
     switch (eventInfo.type) {
     case SDL_QUIT:
@@ -86,7 +107,6 @@ MCDULogic::handle_keypress(SDL_Event &eventInfo)
         if (item->point == keycode) {
           int duration = SDL_TICKS_PASSED(timestamp, item->downTime);
           keydowntimes.erase(item);
-          cout << "duration: " << timestamp - item->downTime << endl;
           if (SDL_TICKS_PASSED(timestamp, item->downTime + long_press_threshold)) {
             this->long_press(keycode);
           } else {
@@ -143,7 +163,7 @@ MCDULogic::keysymToPoint(const struct SDL_Keysym &sym) const
 
 void
 MCDULogic::self_test() {
-  string  testLine = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-+/%()!\'#*^?:;~ ";
+  string  testLine = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-+/%()bo#*udlrt ";
 
   enum ARINC_Color color[] = {
     C_White, C_Red, C_Green, C_Cyan, C_Magenta, C_Amber, C_Yellow
