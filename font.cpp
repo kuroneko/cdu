@@ -47,7 +47,7 @@ MCDUFont::loadUnicodeTTF(const std::string &fontname, int size)
   for (int i = 0; i < 256; i++) {
     glyphs[i] = NULL;
   }  
-#define PREP_GLYPH(x) prerender_glyph(x, x)
+#define PREP_GLYPH(x) prerender_glyph(x, static_cast<Codepoint>(x))
   for (int i = 'A'; i <= 'Z'; i++) {
     PREP_GLYPH(i);
   }
@@ -65,15 +65,17 @@ MCDUFont::loadUnicodeTTF(const std::string &fontname, int size)
   PREP_GLYPH('*');
   PREP_GLYPH('<');
   PREP_GLYPH('>');
-  prerender_glyph_utf8(u8"\u00B0", G_DEGREE);
-  prerender_glyph_utf8(u8"\u25A1", G_BOX);
-  prerender_glyph_utf8(u8"\u2190", G_ARROW_LEFT);
-  prerender_glyph_utf8(u8"\u2191", G_ARROW_UP);
-  prerender_glyph_utf8(u8"\u2192", G_ARROW_RIGHT);
-  prerender_glyph_utf8(u8"\u2193", G_ARROW_DOWN);
-  prerender_glyph_utf8(u8"\u25B3", G_TRIANGLE);
+  prerender_glyph_utf8(u8"\u00B0", Codepoint::DEGREE);
+  prerender_glyph_utf8(u8"\u25A1", Codepoint::BOX);
+  prerender_glyph_utf8(u8"\u2190", Codepoint::LEFT);
+  prerender_glyph_utf8(u8"\u2191", Codepoint::UP);
+  prerender_glyph_utf8(u8"\u2192", Codepoint::RIGHT);
+  prerender_glyph_utf8(u8"\u2193", Codepoint::DOWN);
+  prerender_glyph_utf8(u8"\u25B3", Codepoint::TRIANGLE);
 }
 
+/* This function specifically knows how to glyph-map the TTF font from Hoppie's CDU 3.0 
+*/
 bool
 MCDUFont::loadAerowinxTTF(const std::string &fontname, int size)
 {
@@ -103,13 +105,14 @@ MCDUFont::loadAerowinxTTF(const std::string &fontname, int size)
   PREP_GLYPH('*');
   PREP_GLYPH('<');
   PREP_GLYPH('>');
-  prerender_glyph('g', G_DEGREE);
-  prerender_glyph('!', G_BOX);
-  prerender_glyph('u', G_ARROW_UP);
-  prerender_glyph('d', G_ARROW_DOWN);
-  prerender_glyph('l', G_ARROW_LEFT);
-  prerender_glyph('r', G_ARROW_RIGHT);
-  prerender_glyph('t', G_TRIANGLE);
+  prerender_glyph('b', Codepoint::DEGREE);
+  prerender_glyph('c', Codepoint::BOX);
+  prerender_glyph('^', Codepoint::UP);
+  prerender_glyph('d', Codepoint::DOWN);
+  prerender_glyph('_', Codepoint::LEFT);
+  prerender_glyph('e', Codepoint::RIGHT);
+  prerender_glyph('n', Codepoint::TRIANGLE);
+  prerender_glyph('o', Codepoint::RING);
 
   return true;
 }
@@ -135,7 +138,7 @@ MCDUFont::close_font()
 }
 
 void
-MCDUFont::prerender_glyph(char point, char glyph)
+MCDUFont::prerender_glyph(char point, Codepoint glyph)
 {
   SDL_Texture *rv = NULL;
   char    sbuf[2] = {point, '\0'};
@@ -147,12 +150,12 @@ MCDUFont::prerender_glyph(char point, char glyph)
   if (cleanGlyph->h > max_height) {
     max_height = cleanGlyph->h;
   }
-  glyphs[glyph] = SDL_CreateTextureFromSurface(renderer, cleanGlyph);
+  glyphs[static_cast<unsigned char>(glyph)] = SDL_CreateTextureFromSurface(renderer, cleanGlyph);
   SDL_FreeSurface(cleanGlyph);
 }
 
 void
-MCDUFont::prerender_glyph_utf8(const std::string &point, char glyph)
+MCDUFont::prerender_glyph_utf8(const std::string &point, Codepoint glyph)
 {
   SDL_Texture *rv = NULL;
 
@@ -163,12 +166,15 @@ MCDUFont::prerender_glyph_utf8(const std::string &point, char glyph)
   if (cleanGlyph->h > max_height) {
     max_height = cleanGlyph->h;
   }
-  glyphs[glyph] = SDL_CreateTextureFromSurface(renderer, cleanGlyph);
+  glyphs[static_cast<unsigned char>(glyph)] = SDL_CreateTextureFromSurface(renderer, cleanGlyph);
   SDL_FreeSurface(cleanGlyph);  
 }
 
 SDL_Texture *
-MCDUFont::glyphFor(int point)
+MCDUFont::glyphFor(Codepoint point)
 {
-  return glyphs[point];
+  if (static_cast<int>(point) > 0xFF) {
+    return NULL;
+  }
+  return glyphs[static_cast<unsigned char>(point)];
 }

@@ -13,9 +13,9 @@ MCDUDisplay::MCDUDisplay(SDL_Window *window, SDL_Renderer *renderer, int fontSiz
   cduRenderer = renderer;  
 
   largeFont = new MCDUFont(cduRenderer);
-  largeFont->loadAerowinxTTF("resources/awnxfmcl_fans05.TTF", fontSize);
+  largeFont->loadAerowinxTTF("resources/awnxmcduL_101.TTF", fontSize);
   smallFont = new MCDUFont(cduRenderer);
-  smallFont->loadAerowinxTTF("resources/awnxfmcs_fans05.TTF", fontSize);
+  smallFont->loadAerowinxTTF("resources/awnxmcduS_101.TTF", fontSize);
 
   charcell_height = largeFont->max_height;
   charcell_width = largeFont->max_width;
@@ -96,7 +96,7 @@ MCDUDisplay::render_cell(int row, int column, struct CDU_Cell *data)
     SDL_RenderFillRect(cduRenderer, &bgRect);
   }
 
-  if (data->glyph == 0) {
+  if (data->glyph == Codepoint::NONE) {
     return;
   }
   MCDUFont *font;
@@ -111,8 +111,11 @@ MCDUDisplay::render_cell(int row, int column, struct CDU_Cell *data)
   if (font == NULL) {
     return;
   }
-
   SDL_Texture *glyph = font->glyphFor(data->glyph);
+  if (glyph == NULL) {
+    return;
+  }
+
   enum ARINC_Color fgcolorNum = data->fgcolor;
   if (fgcolorNum == C_Default) {
     fgcolorNum = default_fg;

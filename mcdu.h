@@ -15,15 +15,50 @@
 #include "ss.h"
 
 namespace mcdu {
-
-  enum CDUGlyph {
-    G_DEGREE = '\'',
-    G_BOX = '!',
-    G_ARROW_UP = '^',
-    G_ARROW_DOWN = '?',
-    G_ARROW_LEFT = ':',
-    G_ARROW_RIGHT = ';',
-    G_TRIANGLE = '~',
+  enum class Codepoint : int {
+    NONE = 0x100,  // Not a key.
+    CLEAR = 0x08,
+    DEGREE = 0x1C,
+    BOX = 0x1D,
+    DOWN = 0x1E, 
+    RIGHT = 0x1F, 
+    SPACE = ' ',
+    BANG ='!',
+    QUOTE = '\"', 
+    HASH = '#',
+    PERCENT = '%',
+    AMPERSAND = '&', 
+    APOSTROPHE = '\'', 
+    LPAREN = '(', 
+    RPAREN = ')',
+    ASTERISK = '*', 
+    PLUS = '+', 
+    COMMA = ',', 
+    MINUS = '-', 
+    PERIOD = '.',
+    KP_0 = '0', KP_1, KP_2, KP_3, KP_4, KP_5, KP_6, KP_7, KP_8, KP_9,
+    COLON = ':', 
+    SEMICOMMA = ';', 
+    LT = '<', 
+    EQ = '=', 
+    GT = '>', 
+    QMARK = '?',
+    A = 'A', B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, 
+    W, X, Y, Z,
+    LBRACKET = '[',
+    BACKSLASH = '\\',
+    RBRACKET = ']', 
+	UP = 0x5E,
+	LEFT = 0x5F,
+    
+    // 0x60 onwards
+    MENU = 0x60, FUNC1, FUNC2, FUNC3, FUNC4, FUNC5, FUNC6, FUNC7,
+    FUNC8, FUNC9, FUNC10, FUNC11, FUNC12, FUNC13, TRIANGLE, RING,
+    // 0x70
+    SEL1, SEL2, SEL3, SEL4, SEL5, SEL6,
+    PREVPAGE, NEXTPAGE,
+    SER1, SER2, SER3, SER4, SER5, SER6,
+    DELETE = 0x7F
   };
 
   class MCDUFont {
@@ -41,7 +76,7 @@ namespace mcdu {
     bool  loadUnicodeTTF(const std::string &fontname, int size);
 
     // returns a GPU_Image for the requested codepoint
-    SDL_Texture * glyphFor(int point);
+    SDL_Texture * glyphFor(Codepoint point);
 
     int max_width;
     int max_height;
@@ -52,8 +87,8 @@ namespace mcdu {
     // font data
     TTF_Font *font;
 
-    void prerender_glyph(char point, char glyph);
-    void prerender_glyph_utf8(const std::string &point, char glyph);
+    void prerender_glyph(char point, Codepoint glyph);
+    void prerender_glyph_utf8(const std::string &point, Codepoint glyph);
     void close_font();
     bool open_font(const std::string &fontname, int size);
   };
@@ -76,7 +111,7 @@ namespace mcdu {
   };
 
   struct CDU_Cell {
-    char            glyph;
+    Codepoint        glyph;
     enum ARINC_Color fgcolor;
     enum ARINC_Color bgcolor;
     enum CDU_Font    font;
@@ -92,6 +127,8 @@ namespace mcdu {
     // dimensions (in text terms)
     const int         columns;
     const int         rows;
+
+    static Codepoint codepointForChar(char charIn);
 
     void clear();
     void clear_line(int row, int startCol=0, int endCol=-1);
@@ -146,55 +183,9 @@ namespace mcdu {
     MCDUFont   *smallFont;
   };
 
-  enum class CDUKey : int {
-    NONE = 0,  // Not a key.
-    KP_0 = '0', KP_1, KP_2, KP_3, KP_4, KP_5, KP_6, KP_7, KP_8, KP_9,
-    // All CDUs have these...
-    A = 'A', B, C, D, E, F, G, H, I, J, K, L, M,
-    N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
-    PERIOD = '.',
-    PLUSMINUS = '-',
-    SPACE = ' ',
-    CLEAR = 256,
-    MENU,
-    // Most CDUs have there
-    LKL1, LKL2, LKL3, LKL4, LKL5, LKL6,
-    LKR1, LKR2, LKR3, LKR4, LKR5, LKR6,
-    // these are reasponably universal.
-    PREVPAGE, // Boeing + Universal (PREV)
-    NEXTPAGE, // Boeing + Universal (NEXT)
-    INIT_REF, // Boeing + Airbus (INIT)
-    PROG,   // Boeing + Airbus
-    NAVRAD, // Boeing + Airbus (RAD/NAV) + Universal (TUNE)
-    DELETE, // Boeing
-    EXEC,   // Boeing
-    RTE,    // Boeing + Airbus (F-PLN) + Universal (FPL)
-    DEPARR, // Boeing
-    ATC,    // Boeing + Airbus (ATC COMM)
-    VNAV,   // Boeing + Universal
-    FIX,    // Boeing
-    LEGS,   // Boeing
-    HOLD,   // Boeing
-    FMCCOMM, // Boeing
-    OVFY,   // Airbus
-    DIR,    // Airbus + Universal (DTO)
-    PERF,   // Airbus + Universal (PERF)
-    DATA,   // Airbus + Universal
-    FUELPRED, // Airbus + Universal (FUEL)
-    SECFPLN, // Airbus
-    AIRPORT, // Airbus
-    UP,     // Airbus
-    DOWN,   // Airbus
-    LEFT,   // Airbus
-    RIGHT,  // Airbus
-    NAV,    // Universal
-    LIST,   // Universal
-    MSG,    // Universal
-  };
-
   struct CDUKeypress {
-    Uint32  downTime;
-    CDUKey  key;
+    Uint32  	downTime;
+    Codepoint 	point;
   };
 
   class MCDULogic {
@@ -206,18 +197,21 @@ namespace mcdu {
     int   bg_size_h = 0;
     int   long_press_threshold = 1500; // 1.5 seconds
 
-
     MCDULogic(SDL_Window *win, SDL_Renderer *rend, int fontsize=24);
     //~MCDULogic();
 
     virtual void loop();
     virtual void self_test();
-    virtual void short_press(CDUKey key) = 0;
-    virtual void long_press(CDUKey key) = 0;
+    virtual void short_press(Codepoint key) = 0;
+    virtual void long_press(Codepoint key) = 0;
     virtual void msg_remove(const std::string &msg) = 0;
     virtual void msg_show(const std::string &msg) = 0;
+    virtual bool can_long_press(Codepoint key) = 0;
 
-    virtual CDUKey keysymToKey(const struct SDL_Keysym &sym) const;
+    virtual Codepoint keysymToPoint(const struct SDL_Keysym &sym) const;
+
+    // special
+    virtual int listener();
 
     MCDUDisplay   display;
   protected:
@@ -227,6 +221,9 @@ namespace mcdu {
 
     SDL_Window *cduWindow;
     SDL_Renderer *cduRenderer;
+  private:
+    void start_listener();    
+    bool  running = false;
   };
 };
 

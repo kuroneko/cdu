@@ -65,76 +65,80 @@ MCDULogic::handle_keypress(SDL_Event &eventInfo)
   if (eventInfo.key.repeat) {
     return;
   }
-  CDUKey    keycode = CDUKey::NONE;
+  Codepoint    keycode = Codepoint::NONE;
 
-  keycode = this->keysymToKey(eventInfo.key.keysym);
-  if (keycode == CDUKey::NONE) {
+  keycode = this->keysymToPoint(eventInfo.key.keysym);
+  if (keycode == Codepoint::NONE) {
     return;
   }
   Uint32    timestamp = SDL_GetTicks();
 
   if (eventInfo.key.type == SDL_KEYDOWN) {
-    keydowntimes.push_front(CDUKeypress{downTime: timestamp, key: keycode});
-  } else if (eventInfo.key.type == SDL_KEYUP) {
-    for (list<struct CDUKeypress>::iterator item = keydowntimes.begin(); item != keydowntimes.end(); item++) {
-      if (item->key == keycode) {
-        int duration = SDL_TICKS_PASSED(timestamp, item->downTime);
-        keydowntimes.erase(item);
-        cout << "duration: " << timestamp - item->downTime << endl;
-        if (SDL_TICKS_PASSED(timestamp, item->downTime + long_press_threshold)) {
-          this->long_press(keycode);
-        } else {
-          this->short_press(keycode);
-        }
-        return;
-      }
+    if (this->can_long_press(keycode)) {
+      keydowntimes.push_front(CDUKeypress{downTime: timestamp, point: keycode});
+    } else {
+      this->short_press(keycode);
     }
-    this->short_press(keycode);
+  } else if (eventInfo.key.type == SDL_KEYUP) {
+    // we only care for longpress keys
+    if (this->can_long_press(keycode)) {
+      for (list<struct CDUKeypress>::iterator item = keydowntimes.begin(); item != keydowntimes.end(); item++) {
+        if (item->point == keycode) {
+          int duration = SDL_TICKS_PASSED(timestamp, item->downTime);
+          keydowntimes.erase(item);
+          cout << "duration: " << timestamp - item->downTime << endl;
+          if (SDL_TICKS_PASSED(timestamp, item->downTime + long_press_threshold)) {
+            this->long_press(keycode);
+          } else {
+            this->short_press(keycode);
+          }
+          return;
+        }
+      }
+      // couldn't find the keydown for a long-press key - send it as a short-press anyway
+      this->short_press(keycode);
+    }
   }
 }
 
 //FIXME: this translation needs to be dynamically loadable
-CDUKey
-MCDULogic::keysymToKey(const struct SDL_Keysym &sym) const
+Codepoint
+MCDULogic::keysymToPoint(const struct SDL_Keysym &sym) const
 {
   // first, map the SDL keysym to a CDU keysym
   if (sym.sym >= 'A' && sym.sym <= 'Z') {
-    return static_cast<CDUKey>(sym.sym);
+    return static_cast<Codepoint>(sym.sym);
   }
   if (sym.sym >= 'a' && sym.sym <= 'z') {
-    return static_cast<CDUKey>(toupper(sym.sym));
+    return static_cast<Codepoint>(toupper(sym.sym));
   }
   if (sym.sym >= '0' && sym.sym <= '9') {
-    return static_cast<CDUKey>(sym.sym);
+    return static_cast<Codepoint>(sym.sym);
   }
   switch (sym.sym) {
     case SDLK_SPACE:
-      return CDUKey::SPACE;
+      return Codepoint::SPACE;
     case SDLK_PAGEUP:
-      return CDUKey::PREVPAGE;
+      return Codepoint::PREVPAGE;
     case SDLK_PAGEDOWN:
-      return CDUKey::NEXTPAGE;
+      return Codepoint::NEXTPAGE;
     case SDLK_UP:
-      return CDUKey::UP;
+      return Codepoint::UP;
     case SDLK_DOWN:
-      return CDUKey::DOWN;
+      return Codepoint::DOWN;
     case SDLK_LEFT:
-      return CDUKey::LEFT;
+      return Codepoint::LEFT;
     case SDLK_RIGHT:
-      return CDUKey::RIGHT;
+      return Codepoint::RIGHT;
     case SDLK_BACKSPACE:
-      return CDUKey::CLEAR;
+      return Codepoint::CLEAR;
     //FIXME:  these belong in the Boeing logic only
     case SDLK_DELETE:
-      return CDUKey::DELETE;
-    case SDLK_KP_ENTER:
-    case SDLK_RETURN:
-    case SDLK_RETURN2:
-      return CDUKey::EXEC;
+      return Codepoint::DELETE;
     default:
       break;
   }
-  return CDUKey::NONE;
+  return Codepoint::NONE;
 }
 
 void
@@ -158,3 +162,27 @@ MCDULogic::self_test() {
     }
   }
 }
+
+extern "C" {
+  static int
+  bootstrap_listener(void *objptr)
+  {
+    MCDULogic *obj = static_cast<MCDULogic *>(objptr);
+    return obj->listener();
+  }
+}
+
+void
+MCDULogic::start_listener() {
+  running = true;
+  SDL_CreateThread(&bootstrap_listener, "MCDURecv", this);
+}
+
+int
+MCDULogic::listener() {
+  while (running) {
+    
+  }
+}
+
+

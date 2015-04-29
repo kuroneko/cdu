@@ -47,7 +47,7 @@ MCDUPage::clear_line(int row, int startCol, int endCol)
   }
   for (int i = startCol; i <= endCol; i++) {
     CDU_Cell *thisCell = cell_for(row, i);
-    thisCell->glyph = 0;
+    thisCell->glyph = Codepoint::NONE;
     thisCell->fgcolor = C_Default;
     thisCell->bgcolor = C_Default;
   }
@@ -58,6 +58,31 @@ MCDUPage::clear()
 {
   for (int i; i < rows; i++) {
     clear_line(i);
+  }
+}
+
+Codepoint 
+MCDUPage::codepointForChar(char charIn)
+{
+  switch(charIn) {
+  case '_':
+    return Codepoint::SPACE;
+  case 'o':
+    return Codepoint::DEGREE;
+  case 'b':
+    return Codepoint::BOX;
+  case 'u':
+    return Codepoint::UP;
+  case 'd':
+    return Codepoint::DOWN;
+  case 'l':
+    return Codepoint::LEFT;
+  case 'r':
+    return Codepoint::RIGHT;
+  case 't':
+    return Codepoint::TRIANGLE;
+  default:
+    return static_cast<Codepoint>(charIn);
   }
 }
 
@@ -73,7 +98,7 @@ MCDUPage::write_at(int row, int col, const std::string &message,
     if (i >= message.length()) {
       break;
     }
-    cells[i].glyph = message[i];
+    cells[i].glyph = codepointForChar(message[i]);
     cells[i].fgcolor = fgcolor;
     cells[i].bgcolor = bgcolor;
     cells[i].font = font;

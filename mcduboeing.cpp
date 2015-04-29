@@ -19,47 +19,47 @@ MCDUBoeing::MCDUBoeing(SDL_Window *win, SDL_Renderer *rend)
 }
 
 void
-MCDUBoeing::short_press(CDUKey key)
+MCDUBoeing::short_press(Codepoint key)
 {
   switch (key) {
-    case CDUKey::A:
-    case CDUKey::B:
-    case CDUKey::C:
-    case CDUKey::D:
-    case CDUKey::E:
-    case CDUKey::F:
-    case CDUKey::G:
-    case CDUKey::H:
-    case CDUKey::I:
-    case CDUKey::J:
-    case CDUKey::K:
-    case CDUKey::L:
-    case CDUKey::M:
-    case CDUKey::N:
-    case CDUKey::O:
-    case CDUKey::P:
-    case CDUKey::Q:
-    case CDUKey::R:
-    case CDUKey::S:
-    case CDUKey::T:
-    case CDUKey::U:
-    case CDUKey::V:
-    case CDUKey::W:
-    case CDUKey::X:
-    case CDUKey::Y:
-    case CDUKey::Z:
-    case CDUKey::KP_0:
-    case CDUKey::KP_1:
-    case CDUKey::KP_2:
-    case CDUKey::KP_3:
-    case CDUKey::KP_4:
-    case CDUKey::KP_5:
-    case CDUKey::KP_6:
-    case CDUKey::KP_7:
-    case CDUKey::KP_8:
-    case CDUKey::KP_9:
-    case CDUKey::PERIOD:
-    case CDUKey::SPACE:
+    case Codepoint::A:
+    case Codepoint::B:
+    case Codepoint::C:
+    case Codepoint::D:
+    case Codepoint::E:
+    case Codepoint::F:
+    case Codepoint::G:
+    case Codepoint::H:
+    case Codepoint::I:
+    case Codepoint::J:
+    case Codepoint::K:
+    case Codepoint::L:
+    case Codepoint::M:
+    case Codepoint::N:
+    case Codepoint::O:
+    case Codepoint::P:
+    case Codepoint::Q:
+    case Codepoint::R:
+    case Codepoint::S:
+    case Codepoint::T:
+    case Codepoint::U:
+    case Codepoint::V:
+    case Codepoint::W:
+    case Codepoint::X:
+    case Codepoint::Y:
+    case Codepoint::Z:
+    case Codepoint::KP_0:
+    case Codepoint::KP_1:
+    case Codepoint::KP_2:
+    case Codepoint::KP_3:
+    case Codepoint::KP_4:
+    case Codepoint::KP_5:
+    case Codepoint::KP_6:
+    case Codepoint::KP_7:
+    case Codepoint::KP_8:
+    case Codepoint::KP_9:
+    case Codepoint::PERIOD:
+    case Codepoint::SPACE:
       if (delete_selected) {
         break;
       }
@@ -72,7 +72,7 @@ MCDUBoeing::short_press(CDUKey key)
       scratchpad += static_cast<char>(key);
       update_scratchpad();
       break;
-    case CDUKey::PLUSMINUS:
+    case Codepoint::MINUS:
       if (scratchpad[scratchpad.length()-1] == '-') {
         scratchpad[scratchpad.length()-1] == '+' ;
       } else if (scratchpad[scratchpad.length()-1] == '+' ) {
@@ -84,10 +84,10 @@ MCDUBoeing::short_press(CDUKey key)
       }
       update_scratchpad();
       break;
-    case CDUKey::CLEAR:
+    case Codepoint::CLEAR:
       do_clear(false);
       break;
-    case CDUKey::DELETE:
+    case Codepoint::DELETE:
       do_delete();
       break;
     default:
@@ -98,10 +98,10 @@ MCDUBoeing::short_press(CDUKey key)
 }
 
 void
-MCDUBoeing::long_press(CDUKey key)
+MCDUBoeing::long_press(Codepoint key)
 {
   switch (key) {
-    case CDUKey::CLEAR:
+    case Codepoint::CLEAR:
       do_clear(true);
       break;
     default:
@@ -109,6 +109,21 @@ MCDUBoeing::long_press(CDUKey key)
       break;
   }
 }
+    
+
+bool
+MCDUBoeing::can_long_press(Codepoint key)
+{
+  switch(key) {
+  case Codepoint::CLEAR:
+  case MCDUBoeing::Key_ATC:
+    return true;
+  default:
+    return false;
+  }
+}
+
+
 
 void
 MCDUBoeing::msg_remove(const std::string &msg)
