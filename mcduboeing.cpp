@@ -60,6 +60,7 @@ MCDUBoeing::short_press(Codepoint key)
     case Codepoint::KP_9:
     case Codepoint::PERIOD:
     case Codepoint::SPACE:
+    case Codepoint::SLASH:
       if (delete_selected) {
         break;
       }

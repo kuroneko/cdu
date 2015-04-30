@@ -138,8 +138,14 @@ MCDULogic::keysymToPoint(const struct SDL_Keysym &sym) const
     return static_cast<Codepoint>(sym.sym);
   }
   switch (sym.sym) {
+    case SDLK_PERIOD:
+      return Codepoint::PERIOD;
     case SDLK_SPACE:
       return Codepoint::SPACE;
+    case SDLK_MINUS:
+      return Codepoint::MINUS;
+    case SDLK_SLASH:
+      return Codepoint::SLASH;
     case SDLK_PAGEUP:
       return Codepoint::PREVPAGE;
     case SDLK_PAGEDOWN:

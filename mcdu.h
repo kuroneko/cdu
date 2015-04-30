@@ -36,6 +36,7 @@ namespace mcdu {
     COMMA = ',', 
     MINUS = '-', 
     PERIOD = '.',
+    SLASH = '/',
     KP_0 = '0', KP_1, KP_2, KP_3, KP_4, KP_5, KP_6, KP_7, KP_8, KP_9,
     COLON = ':', 
     SEMICOMMA = ';', 
