@@ -9,7 +9,7 @@
  #define _MCDUBOEING_H
 
  namespace mcduboeing {
-  class MCDUBoeing : public mcdu::MCDULogic {
+  class MCDUBoeing : public mcdu::SmartLogic {
   public:
     MCDUBoeing(SDL_Window *win, SDL_Renderer *rend);
 

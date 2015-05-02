@@ -156,6 +156,7 @@ namespace mcdu {
     const int         rows;
     // the current visible page (static)
     MCDUPage          visiblePage;
+    bool              blank_display = false;
 
     // render the page using the paramters below.
     void render();
@@ -198,33 +199,42 @@ namespace mcdu {
     int   bg_size_h = 0;
     int   long_press_threshold = 1500; // 1.5 seconds
 
+    bool  running = true;
+
     MCDULogic(SDL_Window *win, SDL_Renderer *rend, int fontsize=24);
     //~MCDULogic();
 
     virtual void loop();
+    virtual void key_down(Codepoint key) = 0;
+    virtual void key_up(Codepoint key) = 0;
     virtual void self_test();
-    virtual void short_press(Codepoint key) = 0;
-    virtual void long_press(Codepoint key) = 0;
-    virtual void msg_remove(const std::string &msg) = 0;
-    virtual void msg_show(const std::string &msg) = 0;
-    virtual bool can_long_press(Codepoint key) = 0;
 
     virtual Codepoint keysymToPoint(const struct SDL_Keysym &sym) const;
 
-    // special
-    virtual int listener();
-
     MCDUDisplay   display;
   protected:
-    std::list<struct CDUKeypress> keydowntimes;
     virtual void render();
     virtual void handle_keypress(SDL_Event &eventInfo);
 
     SDL_Window *cduWindow;
     SDL_Renderer *cduRenderer;
-  private:
-    void start_listener();    
-    bool  running = false;
+  };
+
+  class SmartLogic : public MCDULogic {
+  public:
+    std::list<struct CDUKeypress> keydowntimes;
+
+    SmartLogic(SDL_Window *win, SDL_Renderer *rend, int fontsize=24);
+
+    virtual void loop();  
+    virtual void key_down(Codepoint key);
+    virtual void key_up(Codepoint key);
+
+    virtual void short_press(Codepoint key) = 0;
+    virtual void long_press(Codepoint key) = 0;
+    virtual void msg_remove(const std::string &msg) = 0;
+    virtual void msg_show(const std::string &msg) = 0;
+    virtual bool can_long_press(Codepoint key) = 0;
   };
 };
 

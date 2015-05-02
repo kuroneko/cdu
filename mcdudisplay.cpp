@@ -47,7 +47,9 @@ MCDUDisplay::render()
     };
     SDL_RenderFillRect(cduRenderer, &bgRect);
   }
-  visiblePage.render(*this);
+  if (!blank_display) {
+    visiblePage.render(*this);
+  }
   //FIXME: not sure we should be responsible for getting SDL to flush.
   SDL_RenderPresent(cduRenderer);
 }
