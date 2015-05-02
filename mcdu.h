@@ -148,7 +148,7 @@ namespace mcdu {
   class MCDUDisplay {
     friend class MCDUPage;
   public:
-    MCDUDisplay(SDL_Window *window, SDL_Renderer *renderer, int fontSize=24, int rows=14, int cols=24);
+    MCDUDisplay(SDL_Renderer *renderer, int fontSize=24, int rows=14, int cols=24);
     ~MCDUDisplay();
 
     // dimensions (in text terms)
@@ -178,8 +178,6 @@ namespace mcdu {
     SDL_Color color_for_ARINCColor(enum ARINC_Color color);
     void render_cell(int row, int column, struct CDU_Cell *cell_data);
 
-
-    SDL_Window *cduWindow;
     SDL_Renderer *cduRenderer;
     MCDUFont   *largeFont;
     MCDUFont   *smallFont;
@@ -198,10 +196,13 @@ namespace mcdu {
     int   bg_size_w = 0;
     int   bg_size_h = 0;
     int   long_press_threshold = 1500; // 1.5 seconds
+    int     output_w;
+    int     output_h;
+
 
     bool  running = true;
 
-    MCDULogic(SDL_Window *win, SDL_Renderer *rend, int fontsize=24);
+    MCDULogic(SDL_Renderer *rend, int fontsize=24);
     //~MCDULogic();
 
     virtual void loop();
@@ -216,7 +217,6 @@ namespace mcdu {
     virtual void render();
     virtual void handle_keypress(SDL_Event &eventInfo);
 
-    SDL_Window *cduWindow;
     SDL_Renderer *cduRenderer;
   };
 
@@ -224,7 +224,7 @@ namespace mcdu {
   public:
     std::list<struct CDUKeypress> keydowntimes;
 
-    SmartLogic(SDL_Window *win, SDL_Renderer *rend, int fontsize=24);
+    SmartLogic(SDL_Renderer *rend, int fontsize=24);
 
     virtual void loop();  
     virtual void key_down(Codepoint key);

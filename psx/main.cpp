@@ -9,12 +9,14 @@
 #include <cstdlib>
 #include <SDL.h>
 #include <SDL_ttf.h>
+#include <libconfig.h++>
 
 #include "mcdu.h"
 #include "mcdupsx.h"
 
 using namespace std;
 using namespace mcdupsx;
+using namespace libconfig;
 
 #ifdef __cplusplus
 extern "C"
@@ -26,6 +28,8 @@ main(int argc, char **argv)
   TTF_Init();
   IMG_Init(IMG_INIT_PNG);
 
+  SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
+
   SDL_Window *win = NULL;
   SDL_Renderer *rend = NULL;
 
@@ -35,8 +39,15 @@ main(int argc, char **argv)
     exit(1);
   }
 
+  SDL_RendererInfo ri;
+  if (SDL_GetRendererInfo(rend, &ri)) {
+    cerr << "Failed to get SDL Renderer Info: " << SDL_GetError() << endl;
+    return 1;
+  }
+  cout << "Renderer: " << ri.name << endl;
+
   do {
-    MCDUPSX mcdu(win, rend);
+    MCDUPSX mcdu(rend);
     
     mcdu.loop();
   } while (0);

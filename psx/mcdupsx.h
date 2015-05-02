@@ -5,6 +5,8 @@
 
 #include "mcdu.h"
 #include "psx.h"
+#include <libconfig.h++>
+
 #ifndef _MCDUPSX_H
 #define _MCDUPSX_H
 
@@ -29,26 +31,30 @@ namespace mcdupsx {
 
     class MCDUPSX : public mcdu::MCDULogic {
     public:
-        const enum Position position;
+        enum Position position = Position::Left;
 
-        MCDUPSX(SDL_Window *win, SDL_Renderer *rend, enum Position=Position::Left, 
-            const std::string &hostname="localhost", int port=10747);
+        MCDUPSX(SDL_Renderer *rend, const std::string &filename="mcdupsx.conf");
         void send_key(PSXKey key);
         virtual void key_down(mcdu::Codepoint key);
         virtual void key_up(mcdu::Codepoint key);
         virtual void loop();
 
+        bool        annun_exec;
+        bool        annun_msg;
+        bool        annun_dspy;
+        bool        annun_fail;
+        bool        annun_ofst;
+
     protected:
+        libconfig::Config   cduConfiguration;
+
         psx::SimConnectionSdl   connection;
-        std::string scratchpad = "";
-        bool        annun_msg = false;
-        bool        under_test = false;
-        bool        delete_selected = false;
-        std::list<std::string>  messages;
 
         void update_line(int row, const std::string &psx_value);
         mcdu::CDU_Font default_font_size(int row);
         void handle_message(SDL_Event &eventInfo);
+        void set_lights(int newValue);
+        void set_blank(int newValue);
     };
 };
 

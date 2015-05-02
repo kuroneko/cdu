@@ -11,7 +11,7 @@
  namespace mcduboeing {
   class MCDUBoeing : public mcdu::SmartLogic {
   public:
-    MCDUBoeing(SDL_Window *win, SDL_Renderer *rend);
+    MCDUBoeing(SDL_Renderer *rend);
 
     virtual bool can_long_press(mcdu::Codepoint key);
     virtual void short_press(mcdu::Codepoint key);

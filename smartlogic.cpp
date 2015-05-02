@@ -4,8 +4,8 @@
 using namespace std;
 using namespace mcdu;
 
-SmartLogic::SmartLogic(SDL_Window *win, SDL_Renderer *rend, int fontsize)
-  : MCDULogic(win, rend, fontsize)
+SmartLogic::SmartLogic(SDL_Renderer *rend, int fontsize)
+  : MCDULogic(rend, fontsize)
 {
 
 }

@@ -20,6 +20,8 @@ main(int argc, char **argv)
   TTF_Init();
   IMG_Init(IMG_INIT_PNG);
 
+  SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
+
   SDL_Window *win = NULL;
   SDL_Renderer *rend = NULL;
 
@@ -28,9 +30,11 @@ main(int argc, char **argv)
     cout << "ERROR: " << SDL_GetError() << endl;
     exit(1);
   }
+  SDL_RendererInfo ri;
+
 
   do {
-    MCDUBoeing mcdu(win, rend);
+    MCDUBoeing mcdu(rend);
 
     mcdu.msg_show("HELLO WORLD");
     

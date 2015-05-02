@@ -5,8 +5,8 @@ using namespace std;
 using namespace mcdu;
 using namespace mcduboeing;
 
-MCDUBoeing::MCDUBoeing(SDL_Window *win, SDL_Renderer *rend)
-  : SmartLogic(win, rend, 28)
+MCDUBoeing::MCDUBoeing(SDL_Renderer *rend)
+  : SmartLogic(rend, 28)
 {
     SDL_Surface *bgSurf = IMG_Load("resources/B744_CDU.png");
     SDL_Texture *bgtexture = SDL_CreateTextureFromSurface(rend, bgSurf);

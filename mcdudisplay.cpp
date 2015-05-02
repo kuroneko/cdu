@@ -5,11 +5,10 @@
 using namespace std;
 using namespace mcdu;
 
-MCDUDisplay::MCDUDisplay(SDL_Window *window, SDL_Renderer *renderer, int fontSize, int newRows, int newCols) 
+MCDUDisplay::MCDUDisplay(SDL_Renderer *renderer, int fontSize, int newRows, int newCols) 
   : rows(newRows), columns(newCols),
     visiblePage(rows, columns)
 {
-  cduWindow = window;
   cduRenderer = renderer;  
 
   largeFont = new MCDUFont(cduRenderer);

@@ -10,11 +10,11 @@
 using namespace std;
 using namespace mcdu;
 
-MCDULogic::MCDULogic(SDL_Window *win, SDL_Renderer *rend, int fontsize)
-  : display(win, rend, fontsize)
+MCDULogic::MCDULogic(SDL_Renderer *rend, int fontsize)
+  : display(rend, fontsize)
 {
-  cduWindow = win;
   cduRenderer = rend;
+  SDL_GetRendererOutputSize(cduRenderer, &output_w, &output_h);
   // 2 seconds is the actual long-action threshold for Boeing.
   long_press_threshold = 2000;
   self_test();
@@ -23,17 +23,54 @@ MCDULogic::MCDULogic(SDL_Window *win, SDL_Renderer *rend, int fontsize)
 void
 MCDULogic::render()
 {
+  int rend_w, rend_h;
+
+  if (background != NULL) {
+    rend_w = bg_size_w;
+    rend_h = bg_size_h;
+  } else {
+    rend_w = display.charcell_width * display.columns;
+    rend_h = display.charcell_height * display.rows;
+  }
+  SDL_Texture *outTexture = SDL_CreateTexture(cduRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, rend_w, rend_h);
+  SDL_SetRenderTarget(cduRenderer, outTexture);
   SDL_SetRenderDrawColor(cduRenderer, 0, 0, 0, 255);
   SDL_SetRenderDrawBlendMode(cduRenderer, SDL_BLENDMODE_NONE);
   SDL_RenderClear(cduRenderer);
   if (background != NULL) {
     SDL_Rect  dest = {
-      bg_offset_x, bg_offset_y,
+      0, 0,
       bg_size_w, bg_size_h
     };
     SDL_RenderCopy(cduRenderer, background, NULL, &dest);
   }
   display.render();
+
+  // now, reset rendering output back to the window/surface and scale the render to fit
+  // our actual screen
+  SDL_SetRenderTarget(cduRenderer, NULL);
+  SDL_SetRenderDrawColor(cduRenderer, 0, 0, 0, 255);
+  SDL_SetRenderDrawBlendMode(cduRenderer, SDL_BLENDMODE_NONE);
+  SDL_RenderClear(cduRenderer);
+
+  // vscale
+  double vFitScale = (double)output_h / (double)rend_h;
+  double hFitScale = (double)output_w / (double)rend_w;
+
+  double realScale = vFitScale;
+
+  if ((rend_w * vFitScale) > output_w) {
+    realScale = hFitScale;
+  }
+
+  SDL_Rect screenRect = {
+    x: bg_offset_x,
+    y: bg_offset_y,
+    w: (int) ((double)bg_size_w * realScale),
+    h: (int) ((double)bg_size_h * realScale),
+  };
+  SDL_RenderCopy(cduRenderer, outTexture, NULL, &screenRect);
+  SDL_DestroyTexture(outTexture);
 }
 
 void
@@ -53,6 +90,10 @@ MCDULogic::loop()
       running = false;
       continue;
     case SDL_WINDOWEVENT:
+      if (eventInfo.window.event == SDL_WINDOWEVENT_RESIZED) {
+        output_w = eventInfo.window.data1;
+        output_h = eventInfo.window.data2;
+      }
       break;
     case SDL_KEYDOWN:
     case SDL_KEYUP:
