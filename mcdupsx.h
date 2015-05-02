@@ -29,14 +29,14 @@ namespace mcdupsx {
 
     class MCDUPSX : public mcdu::MCDULogic {
     public:
+        const enum Position position;
+
         MCDUPSX(SDL_Window *win, SDL_Renderer *rend, enum Position=Position::Left, 
             const std::string &hostname="localhost", int port=10747);
-
         void send_key(PSXKey key);
-
         virtual void key_down(mcdu::Codepoint key);
         virtual void key_up(mcdu::Codepoint key);
-        const enum Position position;
+        virtual void loop();
 
     protected:
         psx::SimConnectionSdl   connection;
@@ -45,6 +45,10 @@ namespace mcdupsx {
         bool        under_test = false;
         bool        delete_selected = false;
         std::list<std::string>  messages;
+
+        void update_line(int row, const std::string &psx_value);
+        mcdu::CDU_Font default_font_size(int row);
+        void handle_message(SDL_Event &eventInfo);
     };
 };
 

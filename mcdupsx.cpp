@@ -1,4 +1,5 @@
 #include "mcdupsx.h"
+#include "mcdu.h"
 #include "psx.h"
 #include <iostream>
 
@@ -16,7 +17,7 @@ MCDUPSX::MCDUPSX(SDL_Window *win, SDL_Renderer *rend, enum Position position,
     SDL_QueryTexture(bgtexture, NULL, NULL, &bg_size_w, &bg_size_h);
     background = bgtexture;
     display.offset_x = 89;
-    display.offset_y = 62;
+    display.offset_y = 60;
     display.charcell_height = 24;
     SDL_FreeSurface(bgSurf);
 
@@ -137,6 +138,118 @@ MCDUPSX::key_up(Codepoint key)
     msg.value = to_string(-1);
 
     connection.send(msg);
+    break;
+  }
+}
+
+CDU_Font
+MCDUPSX::default_font_size(int row) 
+{
+  if (row<13) {
+    if (row%2) {
+      return Font_Small;
+    }
+  }
+  return Font_Large;
+}
+
+void 
+MCDUPSX::update_line(int row, const std::string &psx_value)
+{
+  for (int i = 0; i < display.columns; i++) {
+    CDU_Cell *  charcell = display.visiblePage.cell_for(row, i);
+    if (i < psx_value.length()) {
+      charcell->glyph = MCDUPage::codepointForChar(psx_value[i]);
+    } else {
+      charcell->glyph = Codepoint::NONE;
+    }
+    charcell->font = default_font_size(row);
+    if (psx_value.length() > display.columns) {
+      char fontSpec; 
+      if (i + display.columns < psx_value.length()) {
+        fontSpec = psx_value[i+display.columns];
+      } else {
+        fontSpec = psx_value[psx_value.length()-1];
+      }
+      switch (fontSpec) {
+      case '+':
+        charcell->font = Font_Large;
+        break;
+      case '-':
+        charcell->font = Font_Small;
+        break;
+      }
+    }
+    charcell->bgcolor = C_Default;
+    charcell->fgcolor = C_Default;
+  }
+}
+
+void
+MCDUPSX::loop()
+{
+  running = true;
+  while(running) {
+    render();
+
+    do {
+      SDL_Event eventInfo;
+      if (!SDL_WaitEvent(&eventInfo)) {
+        cout << SDL_GetError() << endl;
+        return;
+      }
+      switch (eventInfo.type) {
+      case SDL_QUIT:
+        running = false;
+        continue;
+      case SDL_WINDOWEVENT:
+        break;
+      case SDL_KEYDOWN:
+      case SDL_KEYUP:
+        handle_keypress(eventInfo);
+        break;
+      default:
+        if (eventInfo.type == connection.simEventType) {
+          handle_message(eventInfo);
+        }
+        break;
+      }
+    } while(SDL_PollEvent(NULL));
+  }
+}
+
+void
+MCDUPSX::handle_message(SDL_Event &eventInfo)
+{
+  WirePair *msg = static_cast<WirePair*>(eventInfo.user.data1);
+
+  if (msg->key.length() <= 2) {
+    return;
+  }
+  if (msg->key[0] != 'Q') {
+    return;
+  }
+  switch (msg->key[1]) {
+  case 's':
+    std::string paramId = msg->key.substr(2);
+    Qs sCode = static_cast<Qs>(stoi(paramId));
+    Qs firstCode = Qs::LcduTitle;
+    switch(position) {
+    case Position::Left:
+      firstCode = Qs::LcduTitle;
+      break;
+    case Position::Centre:
+      firstCode = Qs::CcduTitle;
+      break;
+    case Position::Right:
+      firstCode = Qs::RcduTitle;
+      break;
+    }
+    if (static_cast<int>(sCode) >= static_cast<int>(firstCode) 
+      && static_cast<int>(sCode) < (static_cast<int>(firstCode) + 14)) {
+      int row = static_cast<int>(sCode) - static_cast<int>(firstCode);
+      update_line(row, msg->value);
+    }
     break;
   }
 }

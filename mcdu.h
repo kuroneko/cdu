@@ -140,9 +140,9 @@ namespace mcdu {
       enum ARINC_Color bgcolor = C_Default);
     void write_at(int row, int col, const MCDUPage &page);
     void render(MCDUDisplay &display) const;
+    CDU_Cell * cell_for(int row, int column) const;
   protected:
     struct CDU_Cell *data;
-    CDU_Cell * cell_for(int row, int column) const;
   };
 
   class MCDUDisplay {
