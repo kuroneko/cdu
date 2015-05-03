@@ -1,11 +1,11 @@
-#include "mcduboeing.h"
+#include "mcduhoppie.h"
 #include <iostream>
 
 using namespace std;
 using namespace mcdu;
-using namespace mcduboeing;
+using namespace mcduhoppie;
 
-MCDUBoeing::MCDUBoeing(SDL_Renderer *rend)
+MCDUHoppie::MCDUHoppie(SDL_Renderer *rend)
   : SmartLogic(rend, 28)
 {
     SDL_Surface *bgSurf = IMG_Load("resources/B744_CDU.png");
@@ -19,7 +19,7 @@ MCDUBoeing::MCDUBoeing(SDL_Renderer *rend)
 }
 
 void
-MCDUBoeing::short_press(Codepoint key)
+MCDUHoppie::short_press(Codepoint key)
 {
   switch (key) {
     case Codepoint::A:
@@ -99,7 +99,7 @@ MCDUBoeing::short_press(Codepoint key)
 }
 
 void
-MCDUBoeing::long_press(Codepoint key)
+MCDUHoppie::long_press(Codepoint key)
 {
   switch (key) {
     case Codepoint::CLEAR:
@@ -113,11 +113,11 @@ MCDUBoeing::long_press(Codepoint key)
     
 
 bool
-MCDUBoeing::can_long_press(Codepoint key)
+MCDUHoppie::can_long_press(Codepoint key)
 {
   switch(key) {
   case Codepoint::CLEAR:
-  case MCDUBoeing::Key_ATC:
+  case MCDUHoppie::Key_ATC:
     return true;
   default:
     return false;
@@ -127,7 +127,7 @@ MCDUBoeing::can_long_press(Codepoint key)
 
 
 void
-MCDUBoeing::msg_remove(const std::string &msg)
+MCDUHoppie::msg_remove(const std::string &msg)
 {
   under_test = false;
   messages.remove(msg);
@@ -135,7 +135,7 @@ MCDUBoeing::msg_remove(const std::string &msg)
 }
 
 void
-MCDUBoeing::msg_show(const std::string &msg)
+MCDUHoppie::msg_show(const std::string &msg)
 {
   under_test = false;
   messages.remove(msg);
@@ -144,7 +144,7 @@ MCDUBoeing::msg_show(const std::string &msg)
 }
 
 void
-MCDUBoeing::update_scratchpad()
+MCDUHoppie::update_scratchpad()
 {
   int scratchpadRow = display.rows - 1; 
   if(messages.empty()) {
@@ -161,7 +161,7 @@ MCDUBoeing::update_scratchpad()
 }
 
 void
-MCDUBoeing::do_delete()
+MCDUHoppie::do_delete()
 {
   // do nothing is there's a pending message
   if (!messages.empty()) {
@@ -177,7 +177,7 @@ MCDUBoeing::do_delete()
 }
 
 void
-MCDUBoeing::do_clear(bool longPress)
+MCDUHoppie::do_clear(bool longPress)
 {
   if (messages.empty()) {
     // no messages?  clear delete if set, otherwise start removing character by character from the scratchpad.

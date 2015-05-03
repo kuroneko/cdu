@@ -5,10 +5,10 @@
 #include <SDL_ttf.h>
 
 #include "mcdu.h"
-#include "mcduboeing.h"
+#include "mcduhoppie.h"
 
 using namespace std;
-using namespace mcduboeing;
+using namespace mcduhoppie;
 
 #ifdef __cplusplus
 extern "C"
@@ -34,7 +34,7 @@ main(int argc, char **argv)
 
 
   do {
-    MCDUBoeing mcdu(rend);
+    MCDUHoppie mcdu(rend);
 
     mcdu.msg_show("HELLO WORLD");
     

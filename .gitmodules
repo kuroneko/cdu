@@ -1,0 +1,3 @@
+[submodule "libpsx"]
+	path = libpsx
+	url = https://github.com/kuroneko/libpsx.git

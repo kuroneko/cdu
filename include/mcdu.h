@@ -12,8 +12,6 @@
 #include <SDL_ttf.h>
 #include <SDL_image.h>
 
-#include "ss.h"
-
 namespace mcdu {
   enum class Codepoint : int {
     NONE = 0x100,  // Not a key.
