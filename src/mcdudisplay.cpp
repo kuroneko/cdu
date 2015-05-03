@@ -49,8 +49,6 @@ MCDUDisplay::render()
   if (!blank_display) {
     visiblePage.render(*this);
   }
-  //FIXME: not sure we should be responsible for getting SDL to flush.
-  SDL_RenderPresent(cduRenderer);
 }
 
 SDL_Color

@@ -8,39 +8,43 @@ using namespace mcdu;
 using namespace mcdupsx;
 using namespace psx;
 
-MCDUPSX::MCDUPSX(SDL_Renderer *rend, const std::string &filename)
-	: MCDULogic(rend, 28), connection("localhost", 10747)
+MCDUPSX::MCDUPSX(SDL_Renderer *rend, Position pos, const std::string &hostname, int port, int font_size)
+	: MCDULogic(rend, font_size), connection(hostname, port), position(pos)
 {
-	cduConfiguration.readFile(filename.c_str());
-
-	if (cduConfiguration.exists("psx.cdu")) {
-		std::string positionName = cduConfiguration.lookup("psx.cdu");
-		if (positionName == "left") {
-			position = Position::Left;
-		} else if (positionName == "centre" || positionName == "center") {
-			position = Position::Centre;
-		} else if (positionName == "right") {
-			position = Position::Right;
-		}
-	}
-	if (cduConfiguration.exists("psx.hostname")) {
-		string newHostname = cduConfiguration.lookup("psx.hostname");
-		connection.hostname = newHostname;
-	}
-	if (cduConfiguration.exists("psx.port")) {
-		connection.port = cduConfiguration.lookup("psx.port");
-	}
-
-	SDL_Surface *bgSurf = IMG_Load("resources/B744_CDU.png");
-	SDL_Texture *bgtexture = SDL_CreateTextureFromSurface(rend, bgSurf);
-	SDL_QueryTexture(bgtexture, NULL, NULL, &bg_size_w, &bg_size_h);
-	background = bgtexture;
-	display.offset_x = 89;
-	display.offset_y = 60;
-	display.charcell_height = 24;
-	SDL_FreeSurface(bgSurf);
-
 	connection.startListener();
+}
+
+MCDUPSX::~MCDUPSX()
+{
+	connection.stopListener();
+}
+
+
+void
+MCDUPSX::reset_background()
+{
+	if (background != NULL) {
+		SDL_DestroyTexture(background);
+		background = NULL;
+		autoscale();
+	}	
+}
+
+void
+MCDUPSX::load_background(const std::string &filename)
+{
+	reset_background();
+	SDL_Surface *bgSurf = IMG_Load(filename.c_str());
+	SDL_Texture *bgtexture = SDL_CreateTextureFromSurface(cduRenderer, bgSurf);
+	SDL_QueryTexture(bgtexture, NULL, NULL, &bg_size_w, &bg_size_h);
+	if (bg_size_w > 0 && bg_size_h > 0) {
+		background = bgtexture;	
+	} else {
+		cerr << "Couldn't load background texture " << filename << endl;
+		SDL_DestroyTexture(background);
+	}
+	SDL_FreeSurface(bgSurf);
+	autoscale();
 }
 
 void
@@ -59,7 +63,7 @@ MCDUPSX::send_key(PSXKey key)
 		wiremsg.setKey(Qh::KeybCduR);
 		break;
 	default:
-		return;
+		return;	
 	}
 	wiremsg.value = to_string(static_cast<int>(key));
 	connection.send(wiremsg);
@@ -223,11 +227,18 @@ MCDUPSX::loop()
 				if (eventInfo.window.event == SDL_WINDOWEVENT_RESIZED) {
 					output_w = eventInfo.window.data1;
 					output_h = eventInfo.window.data2;
+					autoscale();
 				}
 				break;
 			case SDL_KEYDOWN:
 			case SDL_KEYUP:
 				handle_keypress(eventInfo);
+				break;
+			case SDL_MOUSEBUTTONDOWN:
+				handle_mousedown(eventInfo);
+				break;
+			case SDL_MOUSEBUTTONUP:
+				handle_mouseup(eventInfo);
 				break;
 			default:
 				if (eventInfo.type == connection.simEventType) {

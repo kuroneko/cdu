@@ -31,23 +31,23 @@ namespace mcdupsx {
 
     class MCDUPSX : public mcdu::MCDULogic {
     public:
-        enum Position position = Position::Left;
-
-        MCDUPSX(SDL_Renderer *rend, const std::string &filename="mcdupsx.conf");
-        void send_key(PSXKey key);
-        virtual void key_down(mcdu::Codepoint key);
-        virtual void key_up(mcdu::Codepoint key);
-        virtual void loop();
-
+        enum Position position;
         bool        annun_exec;
         bool        annun_msg;
         bool        annun_dspy;
         bool        annun_fail;
         bool        annun_ofst;
 
-    protected:
-        libconfig::Config   cduConfiguration;
+        MCDUPSX(SDL_Renderer *rend, Position pos = Position::Left, const std::string &hostname = "localhost", int port = 10747, int font_size = 28);
+        ~MCDUPSX();
+        void send_key(PSXKey key);
+        virtual void key_down(mcdu::Codepoint key);
+        virtual void key_up(mcdu::Codepoint key);
+        virtual void loop();
+        void reset_background();
+        void load_background(const std::string &filename);
 
+    protected:
         psx::SimConnectionSdl   connection;
 
         void update_line(int row, const std::string &psx_value);
