@@ -1,7 +1,7 @@
 # CDU: A CDU Simulator
 
 CDU is loosly adapted from Hoppie's MCDU application and contains code 
-  genericised for alternate CDU models
+genericised for alternate CDU models
 
 The bulk of the code provides a framework for building model specific and
 simulator specific CDU simulators on top of SDL2.
@@ -24,8 +24,8 @@ unchanged.
 Image work was derived from the originals in Hoppie's MCDU application
 (http://www.hoppie.nl/mcdu/) which is also released under the GPL.
 
-The author reserves the right to release binaries at no cost under 
-licenses other than the GPL when the GPL is incompatible with the 
+The principle author reserves the right to release binaries at no cost
+under licenses other than the GPL when the GPL is incompatible with the 
 distribution mechanism for a given platform.
 
 # Usage
