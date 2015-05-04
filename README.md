@@ -16,8 +16,13 @@ The source code is released under the GNU GPL version 3.
 
 All source code is Copyright (C) 2015, Christopher Collins.
 
-No title is claimed over the image and font assets.  These are used
-with permission from their respective authors.
+The CDU fonts (Aerowinx MCDU Large & Small) are from Aerowinx
+(www.aerowinx.com).  Permission for use with this code has been granted
+as long as credit is appropriately attributed and their names remain
+unchanged.
+
+Image work was derived from the originals in Hoppie's MCDU application
+(http://www.hoppie.nl/mcdu/) which is also released under the GPL.
 
 The author reserves the right to release binaries at no cost under 
 licenses other than the GPL when the GPL is incompatible with the 
@@ -27,3 +32,4 @@ distribution mechanism for a given platform.
 
 For now, read the source.  This will be rewritten when the CDU is closer
 to production ready.
+
