@@ -12,6 +12,10 @@
 #include <SDL_ttf.h>
 #include <SDL_image.h>
 
+namespace libconfig {
+	class Config;
+};
+
 namespace mcdu {
 	enum class Codepoint : int {
 		NONE = 0x100,  // Not a key.
@@ -86,8 +90,7 @@ namespace mcdu {
     	// font data
 		TTF_Font *font;
 
-		void prerender_glyph(char point, Codepoint glyph);
-		void prerender_glyph_utf8(const std::string &point, Codepoint glyph);
+		void prerender_glyph(int point, Codepoint glyph);
 		void close_font();
 		bool open_font(const std::string &fontname, int size);
 	};
@@ -129,7 +132,7 @@ namespace mcdu {
 		MCDUPage(const MCDUPage &original);
 		~MCDUPage();
 
-		void render(MCDUDisplay &display) const;
+		void render(MCDUDisplay &display, SDL_Texture *destTexture, SDL_Texture *fgLayer) const;
 
 		void clear();
 		void clear_line(int row, int startCol=0, int endCol=-1);
@@ -147,7 +150,7 @@ namespace mcdu {
 	class MCDUDisplay {
 		friend class MCDUPage;
 	public:
-		MCDUDisplay(SDL_Renderer *renderer, int fontSize=24, int rows=14, int cols=24);
+		MCDUDisplay(SDL_Renderer *renderer, int rows=14, int cols=24);
 		~MCDUDisplay();
 
 	    // dimensions (in text terms)
@@ -158,28 +161,25 @@ namespace mcdu {
 		bool              blank_display = false;
 
     	// render the page using the paramters below.
-		void render();
+		SDL_Texture *			render();
 
-    	// these two variables control the output size of the CDU panel.
-    	// note that the CDU panel is not clipped to this region!
-		int   charcell_width;
-		int   charcell_height;
+		int 	width;
+		int   height;
 
-		int   offset_x;
-		int   offset_y;
-
-    	// render background enabled/disables the black background.
+  	// render background enabled/disables the black background.
 		bool  render_background = true;
 
 		enum ARINC_Color  default_fg = C_Green;
+
+		MCDUFont   *largeFont;
+		MCDUFont   *smallFont;
 	protected:
     	// some helpers
 		SDL_Color color_for_ARINCColor(enum ARINC_Color color);
-		void render_cell(int row, int column, struct CDU_Cell *cell_data);
+
+		void render_cell(int row, int column, struct CDU_Cell *data, SDL_Texture *bgLayer, SDL_Texture *fgLayer);
 
 		SDL_Renderer *cduRenderer;
-		MCDUFont   *largeFont;
-		MCDUFont   *smallFont;
 	};
 
 	struct CDUKeypress {
@@ -216,34 +216,37 @@ namespace mcdu {
 		int   bg_offset_y = 0;
 		int   bg_size_w = 0;
 		int   bg_size_h = 0;
-	    int   long_press_threshold = 1500; // 1.5 seconds
-	    int     output_w;
-	    int     output_h;
-    	bool  running = true;
-    	double	renderScale = 1.0;
+		int 	display_offset_x = 0;
+		int   display_offset_y = 0;
+    int   long_press_threshold = 1500; // 1.5 seconds
+    int     output_w;
+    int     output_h;
+  	bool  running = true;
+  	double	renderScale = 1.0;
+  	std::list<ScreenBox*>	interactionRegions;
+  	ScreenBox *		mousePressed = NULL;
+  	MCDUDisplay   display;
+		SDL_Renderer *cduRenderer;
 
-    	std::list<ScreenBox*>	interactionRegions;
-
-    	ScreenBox *		mousePressed = NULL;
-
-    	MCDULogic(SDL_Renderer *rend, int fontsize=24);
-    	//~MCDULogic();
+  	MCDULogic(SDL_Renderer *rend);
+  	//~MCDULogic();
 		virtual void autoscale();
-    	virtual void loop();
-    	virtual void key_down(Codepoint key) = 0;
-    	virtual void key_up(Codepoint key) = 0;
-    	virtual void self_test();
+  	virtual void loop();
+  	virtual void key_down(Codepoint key) = 0;
+  	virtual void key_up(Codepoint key) = 0;
+  	virtual void self_test();
 
-    	virtual Codepoint keysymToPoint(const struct SDL_Keysym &sym) const;
+  	virtual Codepoint keysymToPoint(const struct SDL_Keysym &sym) const;
+    void reset_background();
+    void load_background(const std::string &filename);
 
-    	MCDUDisplay   display;
 	protected:
 		virtual void render();
 		virtual void handle_keypress(SDL_Event &eventInfo);
-    	virtual void handle_mousedown(const SDL_Event &eventInfo);
-    	virtual void handle_mouseup(const SDL_Event &eventInfo);
+  	virtual void handle_mousedown(const SDL_Event &eventInfo);
+  	virtual void handle_mouseup(const SDL_Event &eventInfo);
+  	virtual bool handle_other(SDL_Event &eventInfo);
 
-		SDL_Renderer *cduRenderer;
 	};
 
 	class MCDUScreenKey : public ScreenBox {
@@ -268,7 +271,7 @@ namespace mcdu {
 	public:
 		std::list<struct CDUKeypress> keydowntimes;
 
-		SmartLogic(SDL_Renderer *rend, int fontsize=24);
+		SmartLogic(SDL_Renderer *rend);
 
 		virtual void loop();  
 		virtual void key_down(Codepoint key);
@@ -280,6 +283,8 @@ namespace mcdu {
 		virtual void msg_show(const std::string &msg) = 0;
 		virtual bool can_long_press(Codepoint key) = 0;
 	};
+
+	bool configureCDU(MCDULogic &cdu, libconfig::Config &config);
 };
 
 #endif /* _MCDU_H */

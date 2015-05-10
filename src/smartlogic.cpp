@@ -4,10 +4,9 @@
 using namespace std;
 using namespace mcdu;
 
-SmartLogic::SmartLogic(SDL_Renderer *rend, int fontsize)
-  : MCDULogic(rend, fontsize)
+SmartLogic::SmartLogic(SDL_Renderer *rend)
+  : MCDULogic(rend)
 {
-
 }
 
 void
@@ -17,42 +16,55 @@ SmartLogic::loop()
   while(running) {
     render();
 
-    SDL_Event eventInfo;
+    do {
+      SDL_Event eventInfo;
 
-    if (!SDL_PollEvent(NULL) && long_press_threshold != 0 && keydowntimes.size() > 0) {
-      // the oldest key pressed will ALWAYS be at the back of the list.
-      Uint32  firstKey = keydowntimes.back().downTime;
-      Uint32  curTime = SDL_GetTicks();
+      if (!SDL_PollEvent(NULL) && long_press_threshold != 0 && keydowntimes.size() > 0) {
+        // the oldest key pressed will ALWAYS be at the back of the list.
+        Uint32  firstKey = keydowntimes.back().downTime;
+        Uint32  curTime = SDL_GetTicks();
 
-      if (curTime-firstKey >= long_press_threshold) {
-        // if the longpress key pressed has exceeded its timeout, invoke the longpress and
-        // remove it from the pending keys
-        this->long_press(keydowntimes.back().point);
-        keydowntimes.pop_back();
-        continue;
-      } else {
-        SDL_ClearError();
-        if (!SDL_WaitEventTimeout(&eventInfo, long_press_threshold-(curTime-firstKey))) {
-          // timeout.  Re-enter so the early attempt to catch timeouts can fire.
+        if (curTime-firstKey >= long_press_threshold) {
+          // if the longpress key pressed has exceeded its timeout, invoke the longpress and
+          // remove it from the pending keys
+          this->long_press(keydowntimes.back().point);
+          keydowntimes.pop_back();
           continue;
+        } else {
+          if (!SDL_WaitEventTimeout(&eventInfo, long_press_threshold-(curTime-firstKey))) {
+            // timeout.  Re-enter so the early attempt to catch timeouts can fire.
+            continue;
+          }
+        }
+      } else {
+        if (!SDL_WaitEvent(&eventInfo)) {
+          cout << SDL_GetError() << endl;
+          return;
         }
       }
-    } else {
-      if (!SDL_WaitEvent(&eventInfo)) {
-        cout << SDL_GetError() << endl;
+      switch (eventInfo.type) {
+      case SDL_QUIT:
+        running = false;
         return;
+      case SDL_WINDOWEVENT:
+        if (eventInfo.window.event == SDL_WINDOWEVENT_RESIZED) {
+          output_w = eventInfo.window.data1;
+          output_h = eventInfo.window.data2;
+          autoscale();
+        }
+        break;
+      case SDL_KEYDOWN:
+      case SDL_KEYUP:
+        handle_keypress(eventInfo);
+        break;
+      case SDL_MOUSEBUTTONDOWN:
+        handle_mousedown(eventInfo);
+        break;
+      case SDL_MOUSEBUTTONUP:
+        handle_mouseup(eventInfo);
+        break;        
       }
-    }
-    switch (eventInfo.type) {
-    case SDL_QUIT:
-      return;
-    case SDL_WINDOWEVENT:
-      break;
-    case SDL_KEYDOWN:
-    case SDL_KEYUP:
-      handle_keypress(eventInfo);
-      break;
-    }
+    } while (SDL_PollEvent(NULL));
   }
 }
 

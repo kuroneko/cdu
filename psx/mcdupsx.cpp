@@ -8,8 +8,8 @@ using namespace mcdu;
 using namespace mcdupsx;
 using namespace psx;
 
-MCDUPSX::MCDUPSX(SDL_Renderer *rend, Position pos, const std::string &hostname, int port, int font_size)
-	: MCDULogic(rend, font_size), connection(hostname, port), position(pos)
+MCDUPSX::MCDUPSX(SDL_Renderer *rend, Position pos, const std::string &hostname, int port)
+	: MCDULogic(rend), connection(hostname, port), position(pos)
 {
 	connection.startListener();
 }
@@ -17,34 +17,6 @@ MCDUPSX::MCDUPSX(SDL_Renderer *rend, Position pos, const std::string &hostname, 
 MCDUPSX::~MCDUPSX()
 {
 	connection.stopListener();
-}
-
-
-void
-MCDUPSX::reset_background()
-{
-	if (background != NULL) {
-		SDL_DestroyTexture(background);
-		background = NULL;
-		autoscale();
-	}	
-}
-
-void
-MCDUPSX::load_background(const std::string &filename)
-{
-	reset_background();
-	SDL_Surface *bgSurf = IMG_Load(filename.c_str());
-	SDL_Texture *bgtexture = SDL_CreateTextureFromSurface(cduRenderer, bgSurf);
-	SDL_QueryTexture(bgtexture, NULL, NULL, &bg_size_w, &bg_size_h);
-	if (bg_size_w > 0 && bg_size_h > 0) {
-		background = bgtexture;	
-	} else {
-		cerr << "Couldn't load background texture " << filename << endl;
-		SDL_DestroyTexture(background);
-	}
-	SDL_FreeSurface(bgSurf);
-	autoscale();
 }
 
 void
@@ -206,48 +178,14 @@ MCDUPSX::update_line(int row, const std::string &psx_value)
 	}
 }
 
-void
-MCDUPSX::loop()
+bool
+MCDUPSX::handle_other(SDL_Event &eventInfo)
 {
-	running = true;
-	while(running) {
-		render();
-
-		do {
-			SDL_Event eventInfo;
-			if (!SDL_WaitEvent(&eventInfo)) {
-				cout << SDL_GetError() << endl;
-				return;
-			}
-			switch (eventInfo.type) {
-			case SDL_QUIT:
-				running = false;
-				continue;
-			case SDL_WINDOWEVENT:
-				if (eventInfo.window.event == SDL_WINDOWEVENT_RESIZED) {
-					output_w = eventInfo.window.data1;
-					output_h = eventInfo.window.data2;
-					autoscale();
-				}
-				break;
-			case SDL_KEYDOWN:
-			case SDL_KEYUP:
-				handle_keypress(eventInfo);
-				break;
-			case SDL_MOUSEBUTTONDOWN:
-				handle_mousedown(eventInfo);
-				break;
-			case SDL_MOUSEBUTTONUP:
-				handle_mouseup(eventInfo);
-				break;
-			default:
-				if (eventInfo.type == connection.simEventType) {
-					handle_message(eventInfo);
-				}
-				break;
-			}
-		} while(SDL_PollEvent(NULL));
+	if (eventInfo.type == connection.simEventType) {
+		handle_message(eventInfo);
+			return true;
 	}
+	return false;
 }
 
 void

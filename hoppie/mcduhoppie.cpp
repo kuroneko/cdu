@@ -6,16 +6,8 @@ using namespace mcdu;
 using namespace mcduhoppie;
 
 MCDUHoppie::MCDUHoppie(SDL_Renderer *rend)
-  : SmartLogic(rend, 28)
+  : SmartLogic(rend)
 {
-    SDL_Surface *bgSurf = IMG_Load("resources/B744_CDU.png");
-    SDL_Texture *bgtexture = SDL_CreateTextureFromSurface(rend, bgSurf);
-    SDL_QueryTexture(bgtexture, NULL, NULL, &bg_size_w, &bg_size_h);
-    background = bgtexture;
-    display.offset_x = 89;
-    display.offset_y = 62;
-    display.charcell_height = 24;
-    SDL_FreeSurface(bgSurf);
 }
 
 void

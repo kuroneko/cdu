@@ -94,23 +94,14 @@ main(int argc, char **argv)
   }
   cout << "Renderer: " << ri.name << endl;
 
-  int fontSize = 24;
-  cduConfiguration.lookupValue("mcdu.display.font.size", fontSize);
-  cout << "Font Size: " << fontSize << endl;
-
   // not a loop - just an excuse to ensure mcdu gets destroyed before we shutdown SDL. (we get panics otherwise)
   do {
-    MCDUPSX mcdu(rend, position, connHostname, connPort, fontSize);
-
-    if (cduConfiguration.exists("mcdu.background.image")) {
-      mcdu.load_background(cduConfiguration.lookup("mcdu.background.image"));
+    MCDUPSX mcdu(rend, position, connHostname, connPort);
+    // load the common parameters
+    if (!configureCDU(mcdu, cduConfiguration)) {
+      cerr << "Failed to load configuration" << endl;
+      break;
     }
-    cduConfiguration.lookupValue("mcdu.display.offset.x", mcdu.display.offset_x);
-    cduConfiguration.lookupValue("mcdu.display.offset.y", mcdu.display.offset_y);
-    cduConfiguration.lookupValue("mcdu.display.charcell.width", mcdu.display.charcell_width);
-    cduConfiguration.lookupValue("mcdu.display.charcell.height", mcdu.display.charcell_height);
-    cduConfiguration.lookupValue("mcdu.display.fill_background", mcdu.display.render_background);
-      
     mcdu.loop();
   } while (0);
 
