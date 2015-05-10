@@ -5,19 +5,11 @@
 using namespace std;
 using namespace mcdu;
 
-MCDUDisplay::MCDUDisplay(SDL_Renderer *renderer, int fontSize, int newRows, int newCols) 
+MCDUDisplay::MCDUDisplay(SDL_Renderer *renderer, int newRows, int newCols) 
   : rows(newRows), columns(newCols),
     visiblePage(rows, columns)
 {
-  cduRenderer = renderer;  
-
-  largeFont = new MCDUFont(cduRenderer);
-  largeFont->loadAerowinxTTF("resources/awnxmcduL_101.TTF", fontSize);
-  smallFont = new MCDUFont(cduRenderer);
-  smallFont->loadAerowinxTTF("resources/awnxmcduS_101.TTF", fontSize);
-
-  charcell_height = largeFont->max_height;
-  charcell_width = largeFont->max_width;
+  cduRenderer = renderer;
 }
 
 MCDUDisplay::~MCDUDisplay() 
@@ -32,23 +24,44 @@ MCDUDisplay::~MCDUDisplay()
   }
 }
 
-void
+SDL_Texture *
 MCDUDisplay::render() 
 {
+  SDL_Texture *oldTarget = SDL_GetRenderTarget(cduRenderer);
+  SDL_Texture *textureOut = SDL_CreateTexture(cduRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, width, height);
+  if (NULL == textureOut) {
+    return NULL;
+  }
+  SDL_Texture *fgLayer =  SDL_CreateTexture(cduRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, width, height);
+  if (NULL == fgLayer) {
+    SDL_DestroyTexture(fgLayer);
+    return NULL;
+  }
+  SDL_SetRenderTarget(cduRenderer, fgLayer);
+  SDL_SetRenderDrawColor(cduRenderer, 0, 0, 0, 0);
+  SDL_SetRenderDrawBlendMode(cduRenderer, SDL_BLENDMODE_NONE);
+  SDL_RenderClear(cduRenderer);
+
+  SDL_SetRenderTarget(cduRenderer, textureOut);
   if (render_background) {
     SDL_SetRenderDrawColor(cduRenderer, 0, 0, 0, 255);
-    SDL_SetRenderDrawBlendMode(cduRenderer, SDL_BLENDMODE_NONE);
+  } else {
+    SDL_SetRenderDrawColor(cduRenderer, 0, 0, 0 ,0);
+  }
+  SDL_SetRenderDrawBlendMode(cduRenderer, SDL_BLENDMODE_NONE);
+  SDL_RenderClear(cduRenderer);
 
-    SDL_Rect  bgRect = {
-      offset_x, offset_y,
-      charcell_width * columns,
-      charcell_height * rows
-    };
-    SDL_RenderFillRect(cduRenderer, &bgRect);
-  }
   if (!blank_display) {
-    visiblePage.render(*this);
+    visiblePage.render(*this, textureOut, fgLayer);
+    SDL_RenderPresent(cduRenderer);
+    SDL_SetRenderTarget(cduRenderer, textureOut);
+    SDL_SetRenderDrawBlendMode(cduRenderer, SDL_BLENDMODE_BLEND);
+    SDL_RenderCopy(cduRenderer, fgLayer, NULL, NULL);
   }
+  SDL_RenderPresent(cduRenderer);
+  SDL_DestroyTexture(fgLayer);
+  SDL_SetRenderTarget(cduRenderer, oldTarget);
+  return textureOut;
 }
 
 SDL_Color
@@ -75,7 +88,7 @@ MCDUDisplay::color_for_ARINCColor(enum ARINC_Color color)
 }
 
 void
-MCDUDisplay::render_cell(int row, int column, struct CDU_Cell *data)
+MCDUDisplay::render_cell(int row, int column, struct CDU_Cell *data, SDL_Texture *bgLayer, SDL_Texture *fgLayer)
 {
   if (data == NULL) {
     return;
@@ -83,13 +96,14 @@ MCDUDisplay::render_cell(int row, int column, struct CDU_Cell *data)
   // first of all, render the cell background.
   if (data->bgcolor != C_Default) {
     SDL_Rect  bgRect = { 
-      offset_x + (column * charcell_width), 
-      offset_y + (row*charcell_height),
-      charcell_width,
-      charcell_height
+      column * width / columns,
+      row * height / rows,  
+      width / columns,
+      row / height
     };
     SDL_Color bgcolor = color_for_ARINCColor(data->bgcolor);
 
+    SDL_SetRenderTarget(cduRenderer, bgLayer);
     SDL_SetRenderDrawBlendMode(cduRenderer, SDL_BLENDMODE_NONE);
     SDL_SetRenderDrawColor(cduRenderer, bgcolor.r, bgcolor.g, bgcolor.b, bgcolor.a);
     SDL_RenderFillRect(cduRenderer, &bgRect);
@@ -122,17 +136,19 @@ MCDUDisplay::render_cell(int row, int column, struct CDU_Cell *data)
   SDL_Color fgcolor = color_for_ARINCColor(fgcolorNum);
   /* position the box for the glyph */
   SDL_Rect  destRect = { 
-    offset_x + (column * charcell_width), 
-    offset_y + (row*charcell_height) + (charcell_height - font->max_height),
+    column * width / columns, 
+    (row+1) * height / rows - font->max_height,
   };
   SDL_QueryTexture(glyph, NULL, NULL, &destRect.w, &destRect.h);
   // tweak the offset slightly to compensate for under and oversized glyphs.
-  destRect.x += (charcell_width - destRect.w)/2;
+  destRect.x += ((width/columns) - destRect.w)/2;
 
-  SDL_SetRenderDrawColor(cduRenderer, fgcolor.r, fgcolor.g, fgcolor.b, fgcolor.a);
+  SDL_SetRenderTarget(cduRenderer, fgLayer);
   SDL_SetRenderDrawBlendMode(cduRenderer, SDL_BLENDMODE_BLEND);
   SDL_RenderCopy(cduRenderer, glyph, NULL, &destRect);
+  SDL_SetRenderDrawColor(cduRenderer, fgcolor.r, fgcolor.g, fgcolor.b, fgcolor.a);
   SDL_SetRenderDrawBlendMode(cduRenderer, SDL_BLENDMODE_MOD);
   SDL_RenderFillRect(cduRenderer, &destRect);
+  SDL_SetRenderDrawBlendMode(cduRenderer, SDL_BLENDMODE_BLEND);
 }
 

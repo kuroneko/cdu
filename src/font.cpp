@@ -65,13 +65,15 @@ MCDUFont::loadUnicodeTTF(const std::string &fontname, int size)
   PREP_GLYPH('*');
   PREP_GLYPH('<');
   PREP_GLYPH('>');
-  prerender_glyph_utf8(u8"\u00B0", Codepoint::DEGREE);
-  prerender_glyph_utf8(u8"\u25A1", Codepoint::BOX);
-  prerender_glyph_utf8(u8"\u2190", Codepoint::LEFT);
-  prerender_glyph_utf8(u8"\u2191", Codepoint::UP);
-  prerender_glyph_utf8(u8"\u2192", Codepoint::RIGHT);
-  prerender_glyph_utf8(u8"\u2193", Codepoint::DOWN);
-  prerender_glyph_utf8(u8"\u25B3", Codepoint::TRIANGLE);
+  prerender_glyph(0x00B0, Codepoint::DEGREE);
+  prerender_glyph(0x25A1, Codepoint::BOX);
+  prerender_glyph(0x2190, Codepoint::LEFT);
+  prerender_glyph(0x2191, Codepoint::UP);
+  prerender_glyph(0x2192, Codepoint::RIGHT);
+  prerender_glyph(0x2193, Codepoint::DOWN);
+  prerender_glyph(0x25B3, Codepoint::TRIANGLE);
+  
+  return true;
 }
 
 /* This function specifically knows how to glyph-map the TTF font from Hoppie's CDU 3.0 
@@ -138,12 +140,11 @@ MCDUFont::close_font()
 }
 
 void
-MCDUFont::prerender_glyph(char point, Codepoint glyph)
+MCDUFont::prerender_glyph(int point, Codepoint glyph)
 {
   SDL_Texture *rv = NULL;
-  char    sbuf[2] = {point, '\0'};
 
-  SDL_Surface *cleanGlyph = TTF_RenderText_Blended(font, sbuf, SDL_Color{255,255,255,255});
+  SDL_Surface *cleanGlyph = TTF_RenderGlyph_Blended(font, point, SDL_Color{255,255,255,255});
   if (cleanGlyph->w > max_width) {
     max_width = cleanGlyph->w;
   }
@@ -152,22 +153,6 @@ MCDUFont::prerender_glyph(char point, Codepoint glyph)
   }
   glyphs[static_cast<unsigned char>(glyph)] = SDL_CreateTextureFromSurface(renderer, cleanGlyph);
   SDL_FreeSurface(cleanGlyph);
-}
-
-void
-MCDUFont::prerender_glyph_utf8(const std::string &point, Codepoint glyph)
-{
-  SDL_Texture *rv = NULL;
-
-  SDL_Surface *cleanGlyph = TTF_RenderUTF8_Blended(font, point.c_str(), SDL_Color{255,255,255,255});
-  if (cleanGlyph->w > max_width) {
-    max_width = cleanGlyph->w;
-  }
-  if (cleanGlyph->h > max_height) {
-    max_height = cleanGlyph->h;
-  }
-  glyphs[static_cast<unsigned char>(glyph)] = SDL_CreateTextureFromSurface(renderer, cleanGlyph);
-  SDL_FreeSurface(cleanGlyph);  
 }
 
 SDL_Texture *

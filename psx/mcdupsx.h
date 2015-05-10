@@ -38,14 +38,12 @@ namespace mcdupsx {
         bool        annun_fail;
         bool        annun_ofst;
 
-        MCDUPSX(SDL_Renderer *rend, Position pos = Position::Left, const std::string &hostname = "localhost", int port = 10747, int font_size = 28);
+        MCDUPSX(SDL_Renderer *rend, Position pos = Position::Left, const std::string &hostname = "localhost", int port = 10747);
         ~MCDUPSX();
         void send_key(PSXKey key);
         virtual void key_down(mcdu::Codepoint key);
         virtual void key_up(mcdu::Codepoint key);
-        virtual void loop();
-        void reset_background();
-        void load_background(const std::string &filename);
+        virtual bool handle_other(SDL_Event &eventInfo);
 
     protected:
         psx::SimConnectionSdl   connection;
