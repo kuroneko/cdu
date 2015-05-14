@@ -35,12 +35,16 @@ MCDULogic::load_background(const std::string &filename)
 {
 	reset_background();
 	SDL_Surface *bgSurf = IMG_Load(filename.c_str());
+	if (NULL == bgSurf) {
+		cerr << "Error loading background image: " << IMG_GetError() << endl;
+		return;
+	}
 	SDL_Texture *bgtexture = SDL_CreateTextureFromSurface(cduRenderer, bgSurf);
 	SDL_QueryTexture(bgtexture, NULL, NULL, &bg_size_w, &bg_size_h);
 	if (bg_size_w > 0 && bg_size_h > 0) {
 		background = bgtexture;	
 	} else {
-		cerr << "Couldn't load background texture " << filename << endl;
+		cerr << "Background texture had 0 size" << endl;
 		SDL_DestroyTexture(background);
 	}
 	SDL_FreeSurface(bgSurf);
