@@ -145,10 +145,8 @@ MCDUDisplay::render_cell(int row, int column, struct CDU_Cell *data, SDL_Texture
 
   SDL_SetRenderTarget(cduRenderer, fgLayer);
   SDL_SetRenderDrawBlendMode(cduRenderer, SDL_BLENDMODE_BLEND);
+  SDL_SetTextureColorMod(glyph, fgcolor.r, fgcolor.g, fgcolor.b);
   SDL_RenderCopy(cduRenderer, glyph, NULL, &destRect);
-  SDL_SetRenderDrawColor(cduRenderer, fgcolor.r, fgcolor.g, fgcolor.b, fgcolor.a);
-  SDL_SetRenderDrawBlendMode(cduRenderer, SDL_BLENDMODE_MOD);
-  SDL_RenderFillRect(cduRenderer, &destRect);
-  SDL_SetRenderDrawBlendMode(cduRenderer, SDL_BLENDMODE_BLEND);
+  SDL_SetTextureColorMod(glyph, 255, 255, 255);
 }
 
