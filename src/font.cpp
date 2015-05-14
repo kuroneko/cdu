@@ -127,6 +127,8 @@ MCDUFont::open_font(const std::string &fontname, int size)
   if (NULL == font) {
     return false;
   }
+  //FIXME: let this be set in config
+  TTF_SetFontHinting(font, TTF_HINTING_NONE);
   return true; 
 }
 
@@ -144,7 +146,14 @@ MCDUFont::prerender_glyph(int point, Codepoint glyph)
 {
   SDL_Texture *rv = NULL;
 
-  SDL_Surface *cleanGlyph = TTF_RenderGlyph_Blended(font, point, SDL_Color{255,255,255,255});
+  SDL_Surface *cleanGlyph = NULL;
+	  
+  if (antialias) {
+    cleanGlyph = TTF_RenderGlyph_Blended(font, point, SDL_Color{255,255,255,255});
+  } else {
+    cleanGlyph = TTF_RenderGlyph_Solid(font, point, SDL_Color{255,255,255,255});
+  }
+
   if (cleanGlyph->w > max_width) {
     max_width = cleanGlyph->w;
   }

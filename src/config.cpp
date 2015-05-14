@@ -30,6 +30,7 @@ loadCDUFont(MCDULogic &cdu, Config &config, const std::string &fontsuffix)
   }
 
   MCDUFont *rv = new MCDUFont(cdu.cduRenderer);
+  config.lookupValue("mcdu.display.font." + fontsuffix + ".antialias", rv->antialias);
   bool loaded = false;
   if (mapping == "hoppie") {
     loaded = rv->loadAerowinxTTF(fontName, fontSize);

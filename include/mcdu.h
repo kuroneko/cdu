@@ -66,6 +66,8 @@ namespace mcdu {
 
 	class MCDUFont {
 	public:
+	    // should we antialias the font when we render it to texture?
+	    bool antialias = true;
 	    // handle to the renderer (required for initilisation/loading of fonts)
 		SDL_Renderer *  renderer = NULL;
 	    // construct an empty Font
