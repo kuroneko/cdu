@@ -62,6 +62,8 @@ mcdu::configureCDU(MCDULogic &cdu, Config &config)
   config.lookupValue("mcdu.display.position.w", cdu.display.width);
   config.lookupValue("mcdu.display.position.h", cdu.display.height);
   config.lookupValue("mcdu.display.fill_background", cdu.display.render_background);
+  
+  return true;
 }
   
 

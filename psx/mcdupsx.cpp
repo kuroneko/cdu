@@ -117,21 +117,25 @@ MCDUPSX::key_down(Codepoint key)
 		K_MAP(FUNC12,PROG);
 		K_EQUIV(PERIOD);
 		K_EQUIV(MINUS);
+    default:
+        break;
 	}
 }
 
 void
 MCDUPSX::key_up(Codepoint key)
 {
+    WirePair msg;
 	switch(key) {
-		case Codepoint::FUNC6:
-		case Codepoint::CLEAR:
-		WirePair msg;
+	case Codepoint::FUNC6:
+	case Codepoint::CLEAR:
 		msg.setKey(Qh::KeybCduL);
 		msg.value = to_string(-1);
 
 		connection.send(msg);
 		break;
+    default:
+        break;
 	}
 }
 
@@ -260,6 +264,8 @@ MCDUPSX::handle_message(SDL_Event &eventInfo)
 				set_lights(rValue);
 			}
 			break;
+        default:
+            break;
 		}
 	}
 }

@@ -75,7 +75,7 @@ SmartLogic::key_down(Codepoint keycode)
   Uint32    timestamp = SDL_GetTicks();
 
   if (this->can_long_press(keycode)) {
-    keydowntimes.push_front(CDUKeypress{downTime: timestamp, point: keycode});
+    keydowntimes.push_front(CDUKeypress{.downTime = timestamp, .point = keycode});
   } else {
     this->short_press(keycode);
   }

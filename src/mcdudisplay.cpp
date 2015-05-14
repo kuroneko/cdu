@@ -61,7 +61,10 @@ MCDUDisplay::color_for_ARINCColor(enum ARINC_Color color)
     return SDL_Color{255, 255, 0, 255};
   case C_Green:
     return SDL_Color{0, 255, 0, 255};
-  }
+  case C_Default:
+  // should never happen.
+    return SDL_Color{255,255,255,255};
+  }  
 }
 
 void

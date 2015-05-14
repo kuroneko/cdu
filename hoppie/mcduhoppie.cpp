@@ -67,9 +67,9 @@ MCDUHoppie::short_press(Codepoint key)
       break;
     case Codepoint::MINUS:
       if (scratchpad[scratchpad.length()-1] == '-') {
-        scratchpad[scratchpad.length()-1] == '+' ;
+        scratchpad[scratchpad.length()-1] = '+' ;
       } else if (scratchpad[scratchpad.length()-1] == '+' ) {
-        scratchpad[scratchpad.length()-1] == '-' ;
+        scratchpad[scratchpad.length()-1] = '-' ;
       } else {
         if (scratchpad.length() < display.columns) {
           scratchpad += '-';
