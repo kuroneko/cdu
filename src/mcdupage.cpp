@@ -24,14 +24,11 @@ MCDUPage::~MCDUPage()
 }
 
 void
-MCDUPage::render(MCDUDisplay &display, SDL_Texture *destTexture, SDL_Texture *fgLayer) const
+MCDUPage::render(MCDUDisplay &display) const
 {
-  if (NULL == fgLayer || NULL == destTexture) {
-    return;
-  }
   for (int i = 0; i < rows; i++) {
     for (int j = 0; j < columns; j++) {
-      display.render_cell(i, j, cell_for(i, j), destTexture, fgLayer);
+      display.render_cell(i, j, cell_for(i, j));
     }
   }
 }

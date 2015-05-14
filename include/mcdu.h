@@ -132,7 +132,7 @@ namespace mcdu {
 		MCDUPage(const MCDUPage &original);
 		~MCDUPage();
 
-		void render(MCDUDisplay &display, SDL_Texture *destTexture, SDL_Texture *fgLayer) const;
+		void render(MCDUDisplay &display) const;
 
 		void clear();
 		void clear_line(int row, int startCol=0, int endCol=-1);
@@ -161,10 +161,12 @@ namespace mcdu {
 		bool              blank_display = false;
 
     	// render the page using the paramters below.
-		SDL_Texture *			render();
+		void							render();
 
 		int 	width;
 		int   height;
+		int 	offset_x;
+		int 	offset_y;
 
   	// render background enabled/disables the black background.
 		bool  render_background = true;
@@ -177,7 +179,7 @@ namespace mcdu {
     	// some helpers
 		SDL_Color color_for_ARINCColor(enum ARINC_Color color);
 
-		void render_cell(int row, int column, struct CDU_Cell *data, SDL_Texture *bgLayer, SDL_Texture *fgLayer);
+		void render_cell(int row, int column, struct CDU_Cell *data);
 
 		SDL_Renderer *cduRenderer;
 	};
@@ -216,9 +218,7 @@ namespace mcdu {
 		int   bg_offset_y = 0;
 		int   bg_size_w = 0;
 		int   bg_size_h = 0;
-		int 	display_offset_x = 0;
-		int   display_offset_y = 0;
-    int   long_press_threshold = 1500; // 1.5 seconds
+	  int   long_press_threshold = 1500; // 1.5 seconds
     int     output_w;
     int     output_h;
   	bool  running = true;

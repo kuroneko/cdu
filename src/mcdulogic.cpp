@@ -80,10 +80,7 @@ MCDULogic::render()
 {
 	int rend_w, rend_h;
 
-	SDL_Texture *displayOut = display.render();
-	SDL_RenderPresent(cduRenderer);
-
-	SDL_Texture *outTexture;
+	SDL_Texture *outTexture = NULL;
 	if (background != NULL) {
 		rend_w = bg_size_w;
 		rend_h = bg_size_h;
@@ -99,36 +96,34 @@ MCDULogic::render()
 			bg_size_w, bg_size_h
 		};
 		SDL_RenderCopy(cduRenderer, background, NULL, &dest);
-
-		SDL_Rect dispdest = {
-			display_offset_x, display_offset_y,
-			display.width, display.height,
-		};
-		SDL_RenderCopy(cduRenderer, displayOut, NULL, &dispdest);
-		SDL_RenderPresent(cduRenderer);
-		SDL_DestroyTexture(displayOut);
 	} else {
+		SDL_SetRenderTarget(cduRenderer, NULL);
 		rend_w = display.width;
 		rend_h = display.height;
-		outTexture = displayOut;
 	}
+	// now, render the display to its correct position
+	display.render();
+	SDL_RenderPresent(cduRenderer);
 
 	// now, reset rendering output back to the window/surface and scale the render to fit
 	// our actual screen
-	SDL_SetRenderTarget(cduRenderer, NULL);
-	SDL_SetRenderDrawColor(cduRenderer, 0, 0, 0, 255);
-	SDL_SetRenderDrawBlendMode(cduRenderer, SDL_BLENDMODE_BLEND);
-	SDL_RenderClear(cduRenderer);
+	if (outTexture != NULL) {
+		SDL_SetRenderTarget(cduRenderer, NULL);
+		SDL_SetRenderDrawColor(cduRenderer, 0, 0, 0, 255);
+		SDL_SetRenderDrawBlendMode(cduRenderer, SDL_BLENDMODE_BLEND);
+		SDL_RenderClear(cduRenderer);
 
-	SDL_Rect screenRect = {
-		x: bg_offset_x,
-		y: bg_offset_y,
-		w: (int) ((double)bg_size_w * renderScale),
-		h: (int) ((double)bg_size_h * renderScale),
-	};
-	SDL_RenderCopy(cduRenderer, outTexture, NULL, &screenRect);
-	SDL_RenderPresent(cduRenderer);
-	SDL_DestroyTexture(outTexture);
+		SDL_Rect screenRect = {
+			x: bg_offset_x,
+			y: bg_offset_y,
+			w: (int) ((double)bg_size_w * renderScale),
+			h: (int) ((double)bg_size_h * renderScale),
+		};
+		SDL_RenderCopy(cduRenderer, outTexture, NULL, &screenRect);
+		SDL_RenderPresent(cduRenderer);
+		SDL_DestroyTexture(outTexture);
+	}
+
 }
 
 void

@@ -56,8 +56,8 @@ mcdu::configureCDU(MCDULogic &cdu, Config &config)
   if (config.exists("mcdu.background.image")) {
     cdu.load_background(config.lookup("mcdu.background.image"));
   }
-  config.lookupValue("mcdu.display.position.x", cdu.display_offset_x);
-  config.lookupValue("mcdu.display.position.y", cdu.display_offset_y);
+  config.lookupValue("mcdu.display.position.x", cdu.display.offset_x);
+  config.lookupValue("mcdu.display.position.y", cdu.display.offset_y);
   config.lookupValue("mcdu.display.position.w", cdu.display.width);
   config.lookupValue("mcdu.display.position.h", cdu.display.height);
   config.lookupValue("mcdu.display.fill_background", cdu.display.render_background);
