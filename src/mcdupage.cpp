@@ -12,6 +12,7 @@ MCDUPage::MCDUPage(int rows, int columns) : rows(rows), columns(columns)
 MCDUPage::MCDUPage(const MCDUPage &original)
   : MCDUPage(original.rows, original.columns)
 {
+  clear();
   write_at(0, 0, original);
 }
 
@@ -56,7 +57,7 @@ MCDUPage::clear_line(int row, int startCol, int endCol)
 void
 MCDUPage::clear()
 {
-  for (int i; i < rows; i++) {
+  for (int i = 0; i < rows; i++) {
     clear_line(i);
   }
 }

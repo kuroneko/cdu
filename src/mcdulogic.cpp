@@ -27,6 +27,8 @@ MCDULogic::reset_background()
 		SDL_DestroyTexture(background);
 		background = NULL;
 		autoscale();
+		bg_size_w = 0;
+		bg_size_h = 0;
 	}	
 }
 
@@ -100,6 +102,7 @@ MCDULogic::render()
 		SDL_SetRenderTarget(cduRenderer, NULL);
 		rend_w = display.width;
 		rend_h = display.height;
+		SDL_RenderClear(cduRenderer);
 	}
 	// now, render the display to its correct position
 	display.render();

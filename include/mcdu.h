@@ -67,7 +67,7 @@ namespace mcdu {
 	class MCDUFont {
 	public:
 	    // handle to the renderer (required for initilisation/loading of fonts)
-		SDL_Renderer *  renderer;
+		SDL_Renderer *  renderer = NULL;
 	    // construct an empty Font
 		MCDUFont(SDL_Renderer *renderer = NULL);
 
@@ -81,14 +81,14 @@ namespace mcdu {
 	    // returns a GPU_Image for the requested codepoint
 		SDL_Texture * glyphFor(Codepoint point);
 
-		int max_width;
-		int max_height;
+		int max_width = 0;
+		int max_height = 0;
 	private:
     	// internal array of standard glyphs.    
 		SDL_Texture *   glyphs[256];
 
     	// font data
-		TTF_Font *font;
+		TTF_Font *font = NULL;
 
 		void prerender_glyph(int point, Codepoint glyph);
 		void close_font();
@@ -123,8 +123,8 @@ namespace mcdu {
 	class MCDUPage {
 	public:
     	// dimensions (in text terms)
-		const int         columns;
-		const int         rows;
+		const int         columns = 24;
+		const int         rows = 14;
 
 		static Codepoint codepointForChar(char charIn);
 
@@ -144,7 +144,7 @@ namespace mcdu {
 		void write_at(int row, int col, const MCDUPage &page);
 		CDU_Cell * cell_for(int row, int column) const;
 	protected:
-		struct CDU_Cell *data;
+		struct CDU_Cell *data = NULL;
 	};
 
 	class MCDUDisplay {
@@ -163,25 +163,25 @@ namespace mcdu {
     	// render the page using the paramters below.
 		void							render();
 
-		int 	width;
-		int   height;
-		int 	offset_x;
-		int 	offset_y;
+		int 	width = 320;
+		int   height = 240;
+		int 	offset_x = 0;
+		int 	offset_y = 0;
 
   	// render background enabled/disables the black background.
 		bool  render_background = true;
 
 		enum ARINC_Color  default_fg = C_Green;
 
-		MCDUFont   *largeFont;
-		MCDUFont   *smallFont;
+		MCDUFont   *largeFont = NULL;
+		MCDUFont   *smallFont = NULL;
 	protected:
     	// some helpers
 		SDL_Color color_for_ARINCColor(enum ARINC_Color color);
 
 		void render_cell(int row, int column, struct CDU_Cell *data);
 
-		SDL_Renderer *cduRenderer;
+		SDL_Renderer *cduRenderer = NULL;
 	};
 
 	struct CDUKeypress {
@@ -219,14 +219,14 @@ namespace mcdu {
 		int   bg_size_w = 0;
 		int   bg_size_h = 0;
 	  int   long_press_threshold = 1500; // 1.5 seconds
-    int     output_w;
-    int     output_h;
+    int   output_w = 0;
+    int   output_h = 0;
   	bool  running = true;
   	double	renderScale = 1.0;
   	std::list<ScreenBox*>	interactionRegions;
   	ScreenBox *		mousePressed = NULL;
   	MCDUDisplay   display;
-		SDL_Renderer *cduRenderer;
+		SDL_Renderer *cduRenderer = NULL;
 
   	MCDULogic(SDL_Renderer *rend);
   	//~MCDULogic();

@@ -38,7 +38,6 @@ MCDUDisplay::render()
 
   if (!blank_display) {
     visiblePage.render(*this);
-    SDL_RenderPresent(cduRenderer);
   }
 }
 
