@@ -41,16 +41,15 @@ main(int argc, char **argv)
   SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
 
   // CDU logical configuration
-  Position position;
-  if (cduConfiguration.exists("mcdu.position")) {
-    std::string positionName = cduConfiguration.lookup("mcdu.position");
-    if (positionName == "left") {
-      position = Position::Left;
-    } else if (positionName == "centre" || positionName == "center") {
-      position = Position::Centre;
-    } else if (positionName == "right") {
-      position = Position::Right;
-    }
+  Position position = Position::Left;
+  string positionName = "left";
+  cduConfiguration.lookupValue("mcdu.position", positionName);
+  if (positionName == "left") {
+    position = Position::Left;
+  } else if (positionName == "centre" || positionName == "center") {
+    position = Position::Centre;
+  } else if (positionName == "right") {
+    position = Position::Right;
   }
 
   // network parameters

@@ -55,7 +55,9 @@ mcdu::configureCDU(MCDULogic &cdu, Config &config)
   cdu.display.largeFont = loadCDUFont(cdu, config, "large");
 
   if (config.exists("mcdu.background.image")) {
-    cdu.load_background(config.lookup("mcdu.background.image"));
+	  string bgName;
+	  config.lookupValue("mcdu.background.image", bgName);
+    cdu.load_background(bgName);
   }
   config.lookupValue("mcdu.display.position.x", cdu.display.offset_x);
   config.lookupValue("mcdu.display.position.y", cdu.display.offset_y);
