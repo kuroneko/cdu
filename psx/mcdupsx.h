@@ -31,7 +31,7 @@ namespace mcdupsx {
 
     class MCDUPSX : public mcdu::MCDULogic {
     public:
-        enum Position position;
+        Position	position;
         bool        annun_exec;
         bool        annun_msg;
         bool        annun_dspy;

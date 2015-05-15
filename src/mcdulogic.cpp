@@ -117,10 +117,10 @@ MCDULogic::render()
 		SDL_RenderClear(cduRenderer);
 
 		SDL_Rect screenRect = {
-			.x = bg_offset_x,
-			.y = bg_offset_y,
-			.w = (int) ((double)bg_size_w * renderScale),
-			.h = (int) ((double)bg_size_h * renderScale),
+			bg_offset_x,
+			bg_offset_y,
+			(int) ((double)bg_size_w * renderScale),
+			(int) ((double)bg_size_h * renderScale),
 		};
 		SDL_RenderCopy(cduRenderer, outTexture, NULL, &screenRect);
 		SDL_RenderPresent(cduRenderer);
