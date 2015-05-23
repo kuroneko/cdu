@@ -11,6 +11,18 @@ using namespace psx;
 MCDUPSX::MCDUPSX(SDL_Renderer *rend, Position pos, const std::string &hostname, int port)
 	: MCDULogic(rend), connection(hostname, port), position(pos)
 {
+	connection.myName = "sysadninjas.CDU";
+	switch (position) {
+		case Position::Left:
+			connection.myName += ";Left";
+			break;
+		case Position::Centre:
+			connection.myName += ";Centre";
+			break;
+		case Position::Right:
+			connection.myName += ";Right";
+			break;
+	}
 	connection.startListener();
 }
 
