@@ -1,3 +1,6 @@
 [submodule "libpsx"]
 	path = libpsx
 	url = https://github.com/kuroneko/libpsx.git
+[submodule "extern/lua"]
+	path = extern/lua
+	url = https://github.com/lua/lua.git
