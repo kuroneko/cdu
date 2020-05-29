@@ -11,10 +11,7 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 #include <SDL_image.h>
-
-namespace libconfig {
-	class Config;
-};
+#include <sol/sol.hpp>
 
 namespace mcdu {
 	enum class Codepoint : int {
@@ -97,7 +94,7 @@ namespace mcdu {
 		bool open_font(const std::string &fontname, int size);
 	};
 
-	enum ARINC_Color : int {
+	enum class ARINC_Color {
 		C_Black = 0,
 		C_Magenta,
 		C_Cyan,
@@ -140,9 +137,9 @@ namespace mcdu {
 		void clear_line(int row, int startCol=0, int endCol=-1);
 		void write_at(int row, int col,
 			const std::string &Message,
-			enum ARINC_Color fgcolor = C_Default,
+			enum ARINC_Color fgcolor = ARINC_Color::C_Default,
 			enum CDU_Font font = Font_Large,
-			enum ARINC_Color bgcolor = C_Default);
+			enum ARINC_Color bgcolor = ARINC_Color::C_Default);
 		void write_at(int row, int col, const MCDUPage &page);
 		CDU_Cell * cell_for(int row, int column) const;
 	protected:
@@ -173,7 +170,7 @@ namespace mcdu {
   	// render background enabled/disables the black background.
 		bool  render_background = true;
 
-		enum ARINC_Color  default_fg = C_Green;
+		enum ARINC_Color  default_fg = ARINC_Color::C_Green;
 
 		MCDUFont   *largeFont = NULL;
 		MCDUFont   *smallFont = NULL;
@@ -286,7 +283,7 @@ namespace mcdu {
 		virtual bool can_long_press(Codepoint key) = 0;
 	};
 
-	bool configureCDU(MCDULogic &cdu, libconfig::Config &config);
+	bool configureCDU(MCDULogic &cdu, const sol::table &config);
 };
 
 #endif /* _MCDU_H */

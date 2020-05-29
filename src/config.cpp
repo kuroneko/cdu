@@ -8,64 +8,68 @@
 #include <cstdlib>
 #include <SDL.h>
 #include <SDL_ttf.h>
-#include <libconfig.h++>
+#include <sol/sol.hpp>
 
 using namespace std;
 using namespace mcdu;
-using namespace libconfig;
 
 static MCDUFont *
-loadCDUFont(MCDULogic &cdu, Config &config, const std::string &fontsuffix)
-{
-  int fontSize = 24;
-  std::string fontName = "";
-  std::string mapping = "hoppie";
-
-  config.lookupValue("mcdu.display.font." + fontsuffix + ".size", fontSize);
-  config.lookupValue("mcdu.display.font." + fontsuffix + ".file", fontName);
-  config.lookupValue("mcdu.display.font." + fontsuffix + ".mapping", mapping);
-
-  if (fontName == "") {
-    return NULL;
-  }
-
-  MCDUFont *rv = new MCDUFont(cdu.cduRenderer);
-  config.lookupValue("mcdu.display.font." + fontsuffix + ".antialias", rv->antialias);
-  bool loaded = false;
-  if (mapping == "hoppie") {
-    loaded = rv->loadAerowinxTTF(fontName, fontSize);
-  } else {
-    loaded = rv->loadUnicodeTTF(fontName, fontSize);
-  }
-  if (!loaded) {
-    delete rv;
-    rv = NULL;
-  }
-  return rv;
+loadCDUFont(MCDULogic &cdu, const sol::table &config) {
+    int fontSize = config["size"].get_or(24);
+    std::string fontName = config["file"].get_or<string>("");
+    std::string mapping = config["mapping"].get_or<string>("hoppie");
+    if (fontName == "") {
+        return nullptr;
+    }
+    MCDUFont *rv = new MCDUFont(cdu.cduRenderer);
+    rv->antialias = config["antialias"].get_or(false);
+    bool loaded = false;
+    if (mapping == "hoppie") {
+        loaded = rv->loadAerowinxTTF(fontName, fontSize);
+    } else {
+        loaded = rv->loadUnicodeTTF(fontName, fontSize);
+    }
+    if (!loaded) {
+        delete rv;
+        rv = nullptr;
+    }
+    return rv;
 }
 
 bool
-mcdu::configureCDU(MCDULogic &cdu, Config &config)
-{
-  int fontSize = 24;
+mcdu::configureCDU(MCDULogic &cdu, const sol::table &config) {
+    int fontSize = 24;
 
-  // first up, load up the CDU fonts.
+    // first up, load up the CDU fonts.
+    sol::table allFonts = config["display"]["font"].get<sol::table>();
 
-  cdu.display.smallFont = loadCDUFont(cdu, config, "small");
-  cdu.display.largeFont = loadCDUFont(cdu, config, "large");
+    sol::optional<sol::table> smallFont = allFonts["small"].get<sol::table>();
+    sol::optional<sol::table> largeFont = allFonts["large"].get<sol::table>();
 
-  if (config.exists("mcdu.background.image")) {
-	  string bgName;
-	  config.lookupValue("mcdu.background.image", bgName);
-    cdu.load_background(bgName);
-  }
-  config.lookupValue("mcdu.display.position.x", cdu.display.offset_x);
-  config.lookupValue("mcdu.display.position.y", cdu.display.offset_y);
-  config.lookupValue("mcdu.display.position.w", cdu.display.width);
-  config.lookupValue("mcdu.display.position.h", cdu.display.height);
-  config.lookupValue("mcdu.display.fill_background", cdu.display.render_background);
-  
-  return true;
+    if (smallFont.has_value()) {
+        cdu.display.smallFont = loadCDUFont(cdu, smallFont.value());
+        if (cdu.display.smallFont == nullptr) {
+            SDL_Log("Couldn't load small font");
+        }
+    }
+    if (largeFont.has_value()) {
+        cdu.display.largeFont = loadCDUFont(cdu, largeFont.value());
+        if (cdu.display.largeFont == nullptr) {
+            SDL_Log("Couldn't load large font");
+        }
+    }
+
+    sol::optional<string> bgImage = config["background"]["image"];
+    if (bgImage.has_value()) {
+        cdu.load_background(bgImage.value());
+    }
+    cdu.display.offset_x = config["display"]["position"]["x"].get_or(-1);
+    cdu.display.offset_y = config["display"]["position"]["y"].get_or(-1);
+    cdu.display.width = config["display"]["position"]["w"].get_or(-1);
+    cdu.display.height = config["display"]["position"]["h"].get_or(-1);
+    cdu.display.render_background = config["display"]["fill_background"].get_or(false);
+
+    return true;
 }
   
 

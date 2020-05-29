@@ -289,8 +289,14 @@ void
 MCDULogic::self_test() {
 	string  testLine = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-+/%()bo#*udlrt ";
 
-	enum ARINC_Color color[] = {
-		C_White, C_Red, C_Green, C_Cyan, C_Magenta, C_Amber, C_Yellow
+	ARINC_Color color[] = {
+            ARINC_Color::C_White,
+            ARINC_Color::C_Red,
+            ARINC_Color::C_Green,
+            ARINC_Color::C_Cyan,
+            ARINC_Color::C_Magenta,
+            ARINC_Color::C_Amber,
+            ARINC_Color::C_Yellow,
 	};
 
 	int colOffs = 0;

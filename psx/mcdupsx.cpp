@@ -189,8 +189,8 @@ MCDUPSX::update_line(int row, const std::string &psx_value)
 				break;
 			}
 		}
-		charcell->bgcolor = C_Default;
-		charcell->fgcolor = C_Default;
+		charcell->bgcolor = ARINC_Color::C_Default;
+		charcell->fgcolor = ARINC_Color::C_Default;
 	}
 }
 

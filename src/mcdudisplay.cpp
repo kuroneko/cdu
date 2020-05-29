@@ -45,23 +45,23 @@ SDL_Color
 MCDUDisplay::color_for_ARINCColor(enum ARINC_Color color)
 {
   switch (color) {
-  case C_Black:
+  case ARINC_Color::C_Black:
     return SDL_Color{0, 0, 0, 255};
-  case C_Magenta:
+  case ARINC_Color::C_Magenta:
     return SDL_Color{255, 0, 255, 255};
-  case C_Cyan:
+  case ARINC_Color::C_Cyan:
     return SDL_Color{0, 255, 255, 255};
-  case C_Amber:
+  case ARINC_Color::C_Amber:
     return SDL_Color{255, 128, 0, 255};
-  case C_Red:
+  case ARINC_Color::C_Red:
     return SDL_Color{255, 0, 0, 255};
-  case C_White:
+  case ARINC_Color::C_White:
     return SDL_Color{255, 255, 255, 255};
-  case C_Yellow:
+  case ARINC_Color::C_Yellow:
     return SDL_Color{255, 255, 0, 255};
-  case C_Green:
+  case ARINC_Color::C_Green:
     return SDL_Color{0, 255, 0, 255};
-  case C_Default:
+  case ARINC_Color::C_Default:
   // should never happen.
     return SDL_Color{255,255,255,255};
   }  
@@ -70,11 +70,11 @@ MCDUDisplay::color_for_ARINCColor(enum ARINC_Color color)
 void
 MCDUDisplay::render_cell(int row, int column, struct CDU_Cell *data)
 {
-  if (data == NULL) {
+  if (data == nullptr) {
     return;
   }
   // first of all, render the cell background.
-  if (data->bgcolor != C_Default) {
+  if (data->bgcolor != ARINC_Color::C_Default) {
     SDL_Rect  bgRect = { 
       offset_x + (column * width / columns),
       offset_y + (row * height / rows),
@@ -109,7 +109,7 @@ MCDUDisplay::render_cell(int row, int column, struct CDU_Cell *data)
   }
 
   enum ARINC_Color fgcolorNum = data->fgcolor;
-  if (fgcolorNum == C_Default) {
+  if (fgcolorNum == ARINC_Color::C_Default) {
     fgcolorNum = default_fg;
   }
   SDL_Color fgcolor = color_for_ARINCColor(fgcolorNum);

@@ -49,8 +49,8 @@ MCDUPage::clear_line(int row, int startCol, int endCol)
   for (int i = startCol; i <= endCol; i++) {
     CDU_Cell *thisCell = cell_for(row, i);
     thisCell->glyph = Codepoint::NONE;
-    thisCell->fgcolor = C_Default;
-    thisCell->bgcolor = C_Default;
+    thisCell->fgcolor = ARINC_Color::C_Default;
+    thisCell->bgcolor = ARINC_Color::C_Default;
   }
 }
 

@@ -32,13 +32,13 @@ distribution mechanism for a given platform.
 
 To build the current cdu clients, you will need
 
-* CMake 3.1
+* A C++17 compatible compiler
+* CMake 3.x
 * SDL2
 * SDL2_ttf
 * SDL2_image
-* libconfig
 
-After checking out the source tree and initialising the submodules (libpsx)
+After checking out the source tree and initialising the submodules (libpsx, sol2 and lua)
 
 1. Create and change to a build directory.  (You don't want to do your builds in the source tree)
 
@@ -46,7 +46,7 @@ After checking out the source tree and initialising the submodules (libpsx)
 
 1. Run `make`
 
-To prep the tree for testing, link the cdu/resources directory to your build directory, and copy cdu/psx/mcdupsx.conf.sample to mcdupsx.conf, and edit to suit your system(s).
+To prep the tree for testing, link the cdu/resources directory to your build directory, and copy cdu/psx/mcdupsx.lua to `mcdupsx.lua`, and edit to suit your system(s).
 
 Then, from the directory containing the resources symlink and config file, start the `psx/mcdupsx` binary.
 

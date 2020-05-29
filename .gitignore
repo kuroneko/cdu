@@ -1,0 +1,12 @@
+# CLion build directories.
+/cmake-build-*
+
+# editor temp files
+*.bak
+*~
+\#*
+*.swp
+
+# Windows runtime libraries - typically we've built these or we've had to hand
+# copy them in to support debugging.
+*.dll

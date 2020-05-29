@@ -5,7 +5,6 @@
 
 #include "mcdu.h"
 #include "psx.h"
-#include <libconfig.h++>
 
 #ifndef _MCDUPSX_H
 #define _MCDUPSX_H
